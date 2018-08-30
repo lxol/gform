@@ -73,22 +73,25 @@ object ValueParser {
   lazy val contextField: Parser[Expr] = ("eeitt" ~ "." ~ eeitt ^^ { (loc, _, _, eeitt) =>
     EeittCtx(eeitt)
   }
+    | "user" ~ "." ~ enrolmentsField ^^ { (loc, _, _, enrolment) =>
+      EnrolmentsCtx(enrolment)
+    }
     | "user" ~ "." ~ userField ^^ { (loc, _, _, userField) =>
       UserCtx(userField)
     }
-    | "form" ~ "." ~ alphabeticOnly ^^ { (loc, _, _, fieldName) =>
+    | "form" ~ "." ~ wordOnly ^^ { (loc, _, _, fieldName) =>
       FormCtx(fieldName)
     }
     | "auth" ~ "." ~ authInfo ^^ { (loc, _, _, authInfo) =>
       AuthCtx(authInfo)
     }
-    | alphabeticOnly ~ ".sum" ^^ { (loc, value, _) =>
+    | wordOnly ~ ".sum" ^^ { (loc, value, _) =>
       Sum(FormCtx(value))
     }
     | anyDigitConst ^^ { (loc, str) =>
       str
     }
-    | alphabeticOnly ^^ { (loc, fn) =>
+    | wordOnly ^^ { (loc, fn) =>
       FormCtx(fn)
     })
 
@@ -112,7 +115,11 @@ object ValueParser {
   }
     | contextField)
 
-  lazy val alphabeticOnly: Parser[String] = """[a-zA-Z][a-zA-Z0-9]+""".r ^^ { (loc, str) =>
+  lazy val wordOnly: Parser[String] = """\w+""".r ^^ { (loc, str) =>
+    str
+  }
+
+  lazy val serviceName: Parser[String] = """[-\w]+""".r ^^ { (loc, str) =>
     str
   }
 
@@ -152,6 +159,11 @@ object ValueParser {
   lazy val userField: Parser[UserField] =
     "affinityGroup" ^^ { (loc, _) =>
       AffinityGroup
+    }
+
+  lazy val enrolmentsField: Parser[EnrolmentId] =
+    "enrolments" ~ serviceName ~ "." ~ wordOnly ^^ { (loc, _, service, _, idName) =>
+      EnrolmentId(service, idName)
     }
 
   lazy val authInfo: Parser[AuthInfo] = ("gg" ^^ { (_, _) =>

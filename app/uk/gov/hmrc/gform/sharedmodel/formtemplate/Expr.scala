@@ -58,6 +58,7 @@ object FormCtx {
 final case class AuthCtx(value: AuthInfo) extends Expr
 final case class EeittCtx(value: Eeitt) extends Expr
 final case class UserCtx(value: UserField) extends Expr
+final case class EnrolmentsCtx(enrolment: EnrolmentId) extends Expr
 final case class Constant(value: String) extends Expr
 final case object Value extends Expr
 
@@ -80,6 +81,11 @@ object Eeitt {
 
 sealed trait UserField
 final case object AffinityGroup extends UserField
+final case class EnrolmentId(service: String, idName: String) extends UserField
+
+object EnrolmentId {
+  implicit val format: OFormat[EnrolmentId] = derived.oformat
+}
 
 object UserField {
   implicit val format: OFormat[UserField] = derived.oformat
