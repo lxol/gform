@@ -49,7 +49,6 @@ class SubmissionController(submissionService: SubmissionService) extends BaseCon
         formId,
         getFromHeaders("customerId", request, _.getOrElse("")),
         getFromHeaders("affinityGroup", request, toAffinityGroupO))
-      .recoverWith { case e: RouteException => invalid(UnexpectedState(e.message)) }
       .fold(_.asBadRequest, _ => NoContent)
   }
 

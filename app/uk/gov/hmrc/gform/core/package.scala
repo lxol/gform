@@ -48,4 +48,11 @@ package object core {
     }
     EitherT[Future, UnexpectedState, A](futureA)
   }
+
+  def fromFutureARecovering[A](fa: Future[A])(f: PartialFunction[Throwable,Opt[A]])(implicit ec: ExecutionContext): FOpt[A] =
+    fromFutureOptA(
+      fa.map(Right[UnexpectedState, A])
+        .recover(f)
+    )
+
 }

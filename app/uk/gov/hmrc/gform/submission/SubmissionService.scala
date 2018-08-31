@@ -136,25 +136,21 @@ class SubmissionService(
     case _                                  => Future.failed(new Exception(s"Form $FormId status is not signed"))
   }
 
-  def fromFutureARecovering[A](fa: Future[A])(implicit ec: ExecutionContext): FOpt[A] =
-    fromFutureOptA(
-      fa.map(Right[UnexpectedState, A])
-        .recover{ case e: RouteException => Left(UnexpectedState(e.message))})
-
   def submission(formId: FormId, customerId: String, affinityGroup: Option[AffinityGroup])(
     implicit hc: HeaderCarrier): FOpt[Unit] =
     // format: OFF
     for {
-      form                <- fromFutureA        (getSignedForm(formId))
-      formTemplate        <- fromFutureA        (formTemplateService.get(form.formTemplateId))
-      sectionFormFields   <- fromOptA           (SubmissionServiceHelper.getSectionFormFields(form, formTemplate, affinityGroup))
-      submissionAndPdf    <- fromFutureA        (getSubmissionAndPdf(form.envelopeId, form, sectionFormFields, formTemplate, customerId))
-      numberOfAttachments =                     sectionFormFields.map(_.numberOfFiles).sum
+      form                <- fromFutureA           (getSignedForm(formId))
+      formTemplate        <- fromFutureA           (formTemplateService.get(form.formTemplateId))
+      sectionFormFields   <- fromOptA              (SubmissionServiceHelper.getSectionFormFields(form, formTemplate, affinityGroup))
+      submissionAndPdf    <- fromFutureA           (getSubmissionAndPdf(form.envelopeId, form, sectionFormFields, formTemplate, customerId))
+      numberOfAttachments =                        sectionFormFields.map(_.numberOfFiles).sum
       res                 <- fromFutureARecovering (fileUploadService.submitEnvelope(submissionAndPdf, formTemplate.dmsSubmission, numberOfAttachments))
-      _                   <-                    submissionRepo.upsert(submissionAndPdf.submission)
-      _                   <- fromFutureA        (formService.updateUserData(form._id, UserData(form.formData, form.repeatingGroupStructure, Submitted)))
-      emailAddress        =                     email.getEmailAddress(form)
-      _                   <- fromFutureA        (email.sendEmail(emailAddress, formTemplate.emailTemplateId)(hc, fromLoggingDetails))
+                                           { case e: RouteException => Left(UnexpectedState(e.message))}
+      _                   <-                       submissionRepo.upsert(submissionAndPdf.submission)
+      _                   <- fromFutureA           (formService.updateUserData(form._id, UserData(form.formData, form.repeatingGroupStructure, Submitted)))
+      emailAddress        =                        email.getEmailAddress(form)
+      _                   <- fromFutureA           (email.sendEmail(emailAddress, formTemplate.emailTemplateId)(hc, fromLoggingDetails))
     } yield res
     // format: ON
 
