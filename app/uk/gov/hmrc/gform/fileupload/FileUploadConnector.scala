@@ -22,10 +22,10 @@ import uk.gov.hmrc.gform.sharedmodel.form.{ EnvelopeId, FileId }
 import uk.gov.hmrc.gform.sharedmodel.formtemplate.FormTemplateId
 import uk.gov.hmrc.gform.time.TimeProvider
 import uk.gov.hmrc.gform.wshttp.WSHttp
-
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
+import uk.gov.hmrc.http.{ BadRequestException, HeaderCarrier, HttpResponse }
 
 class FileUploadConnector(config: FUConfig, wSHttp: WSHttp, timeProvider: TimeProvider) {
   val helper = new Helper(config, timeProvider)
@@ -43,6 +43,11 @@ class FileUploadConnector(config: FUConfig, wSHttp: WSHttp, timeProvider: TimePr
     Logger.info(s"route envelope, input: '${input.envelopeId.value}, ${loggingHelpers.cleanHeaderCarrierHeader(hc)} ")
     wSHttp
       .POST[RouteEnvelopeRequest, HttpResponse](s"$baseUrl/file-routing/requests", input, headers)
+      // Debug code
+      // simulate routing failure
+      .flatMap(_ =>
+        Future.failed(new BadRequestException("""{"error":{"msg":"Envelope size exceeds maximum of 26.00 MB"}}""")))
+      // End of debug code
       .map(_ => ())
   }
 

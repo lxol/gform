@@ -24,7 +24,7 @@ import cats.syntax.traverse._
 import uk.gov.hmrc.gform.core._
 import uk.gov.hmrc.gform.email.EmailService
 import uk.gov.hmrc.gform.exceptions.UnexpectedState
-import uk.gov.hmrc.gform.fileupload.{ FileUploadService, MetadataXml }
+import uk.gov.hmrc.gform.fileupload.FileUploadService
 import uk.gov.hmrc.gform.form.FormService
 import uk.gov.hmrc.gform.formtemplate.{ FormTemplateService, RepeatingComponentService, SectionHelper }
 import uk.gov.hmrc.gform.sharedmodel.Visibility
@@ -39,7 +39,6 @@ import scala.concurrent.{ ExecutionContext, Future }
 import uk.gov.hmrc.http.HeaderCarrier
 import org.apache.pdfbox.pdmodel.PDDocument
 
-import scala.util.{ Failure, Success }
 class SubmissionService(
   pdfGeneratorService: PdfGeneratorService,
   formService: FormService,
@@ -67,13 +66,7 @@ class SubmissionService(
     val html = HtmlGeneratorService.generateDocumentHTML(sectionFormFields, formTemplate.formName, form.formData)
 
     pdfGeneratorService.generatePDF(html).map { pdf =>
-      /*
-      val path = java.nio.file.Paths.get("confirmation.pdf")
-      val out = java.nio.file.Files.newOutputStream(path)
-      out.write(pdf)
-      out.close()
-       */
-      //todo install 3rd part part
+      // TODO: install 3rd part part
       val pdfSummary = PdfSummary(numberOfPages = PDDocument.load(pdf).getNumberOfPages, pdfContent = pdf)
       val submission = Submission(
         submittedDate = timeProvider.localDateTime(),
@@ -83,7 +76,7 @@ class SubmissionService(
         noOfAttachments = getNoOfAttachments(form, formTemplate),
         dmsMetaData = DmsMetaData(
           formTemplateId = form.formTemplateId,
-          customerId //TODO need more secure and safe way of doing this. perhaps moving auth to backend and just pulling value out there.
+          customerId //TODO: need more secure and safe way of doing this. perhaps moving auth to backend and just pulling value out there.
         )
       )
 
@@ -99,7 +92,7 @@ class SubmissionService(
       SubmissionAndPdf(submission = submission, pdfSummary = pdfSummary, xmlSummary = xmlSummary)
     }
   }
-  //todo refactor the two methods into one
+  // TODO: refactor the two methods into one
   def getSubmissionAndPdfWithPdf(
     envelopeId: EnvelopeId,
     form: Form,
@@ -108,13 +101,6 @@ class SubmissionService(
     customerId: String,
     formTemplate: FormTemplate)(implicit hc: HeaderCarrier): Future[SubmissionAndPdf] =
     pdfGeneratorService.generatePDF(pdf).map { pdf =>
-      /*
-      val path = java.nio.file.Paths.get("confirmation.pdf")
-      val out = java.nio.file.Files.newOutputStream(path)
-      out.write(pdf)
-      out.close()
-       */
-
       val pDDocument: PDDocument = PDDocument.load(pdf)
       val pdfSummary = PdfSummary(numberOfPages = pDDocument.getNumberOfPages, pdfContent = pdf)
       pDDocument.close()
@@ -155,10 +141,10 @@ class SubmissionService(
       formTemplate        <- fromFutureA        (formTemplateService.get(form.formTemplateId))
       sectionFormFields   <- fromOptA           (SubmissionServiceHelper.getSectionFormFields(form, formTemplate, affinityGroup))
       submissionAndPdf    <- fromFutureA        (getSubmissionAndPdf(form.envelopeId, form, sectionFormFields, formTemplate, customerId))
-      _                   <-                    submissionRepo.upsert(submissionAndPdf.submission)
-      _                   <- fromFutureA        (formService.updateUserData(form._id, UserData(form.formData, form.repeatingGroupStructure, Submitted)))
       numberOfAttachments =                     sectionFormFields.map(_.numberOfFiles).sum
       res                 <- fromFutureA        (fileUploadService.submitEnvelope(submissionAndPdf, formTemplate.dmsSubmission, numberOfAttachments))
+      _                   <-                    submissionRepo.upsert(submissionAndPdf.submission)
+      _                   <- fromFutureA        (formService.updateUserData(form._id, UserData(form.formData, form.repeatingGroupStructure, Submitted)))
       emailAddress        =                     email.getEmailAddress(form)
       _                   <- fromFutureA        (email.sendEmail(emailAddress, formTemplate.emailTemplateId)(hc, fromLoggingDetails))
     } yield res
@@ -168,16 +154,15 @@ class SubmissionService(
     implicit hc: HeaderCarrier): FOpt[Unit] =
     // format: OFF
     for {
-//      form                <- fromFutureA        (getSignedForm(formId))
       form                <- fromFutureA        (formService.get(formId))
       formTemplate        <- fromFutureA        (formTemplateService.get(form.formTemplateId))
       sectionFormFields   <- fromOptA           (SubmissionServiceHelper.getSectionFormFields(form, formTemplate, affinityGroup))
       submissionAndPdf    <- fromFutureA        (getSubmissionAndPdfWithPdf(form.envelopeId, form, sectionFormFields, pdf ,customerId, formTemplate))
-      _                   <-                    submissionRepo.upsert(submissionAndPdf.submission)
-      _                   <- fromFutureA        (formService.updateUserData(form._id, UserData(form.formData, form.repeatingGroupStructure, Submitted)))
       sectionFormFields   <- fromOptA           (SubmissionServiceHelper.getSectionFormFields(form, formTemplate, affinityGroup))
       numberOfAttachments =                     sectionFormFields.map(_.numberOfFiles).sum
       res                 <- fromFutureA        (fileUploadService.submitEnvelope(submissionAndPdf, formTemplate.dmsSubmission, numberOfAttachments))
+      _                   <-                    submissionRepo.upsert(submissionAndPdf.submission)
+      _                   <- fromFutureA        (formService.updateUserData(form._id, UserData(form.formData, form.repeatingGroupStructure, Submitted)))
       emailAddress        =                     email.getEmailAddress(form)
       _                   <- fromFutureA        (email.sendEmail(emailAddress, formTemplate.emailTemplateId)(hc, fromLoggingDetails))
     } yield res
