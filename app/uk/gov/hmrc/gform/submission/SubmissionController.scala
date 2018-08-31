@@ -25,7 +25,9 @@ import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.gform.auditing.loggingHelpers
 import uk.gov.hmrc.gform.controllers.BaseController
 import uk.gov.hmrc.gform.core.FOpt
+import uk.gov.hmrc.gform.core.invalid
 import uk.gov.hmrc.gform.exceptions.UnexpectedState
+import uk.gov.hmrc.gform.fileupload.RouteException
 import uk.gov.hmrc.gform.sharedmodel.form.FormId
 import uk.gov.hmrc.gform.sharedmodel.AffinityGroupUtil._
 import uk.gov.hmrc.http.BadRequestException
@@ -42,28 +44,14 @@ class SubmissionController(submissionService: SubmissionService) extends BaseCon
     //TODO validate all sections before submission (whole form)
     //TODO change status of form to 'submitted'
 
-    yy(
-      submissionService
-        .submission(
-          formId,
-          getFromHeaders("customerId", request, _.getOrElse("")),
-          getFromHeaders("affinityGroup", request, toAffinityGroupO))
-//      .fold(_.asBadRequest, _ => NoContent)
-//      .recoverWith( case e: BadRequestException => new FOpt[Unit](()))
-    ).fold(_.asBadRequest, x => {
-      x
-      val xx = x
-      val yy = xx
-      NoContent
-    })
-
+    submissionService
+      .submission(
+        formId,
+        getFromHeaders("customerId", request, _.getOrElse("")),
+        getFromHeaders("affinityGroup", request, toAffinityGroupO))
+      .recoverWith { case e: RouteException => invalid(UnexpectedState(e.message)) }
+      .fold(_.asBadRequest, _ => NoContent)
   }
-
-  def yy(y: FOpt[Unit])(implicit F: Monad[Future]): FOpt[Unit] =
-    y.recoverWith {
-      case e: BadRequestException =>
-        EitherT[Future, UnexpectedState, Unit](Future.successful(Left(UnexpectedState(e.message))))
-    }
 
   def submitWithPdf(formId: FormId) = Action.async { implicit request =>
     Logger.info(s"submit, formId: '${formId.value}, ${loggingHelpers.cleanHeaders(request.headers)}")

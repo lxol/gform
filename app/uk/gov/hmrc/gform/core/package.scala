@@ -28,6 +28,9 @@ package object core {
   def success[A](a: A): FOpt[A] =
     EitherT[Future, UnexpectedState, A](Future.successful(Right(a)))
 
+  def invalid[A](i: UnexpectedState): FOpt[A] =
+    EitherT[Future, UnexpectedState, A](Future.successful(Left(i)))
+
   def fromFutureOptA[A](fa: Future[Opt[A]]): FOpt[A] =
     EitherT[Future, UnexpectedState, A](fa)
 

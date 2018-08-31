@@ -27,6 +27,8 @@ import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
 import uk.gov.hmrc.http.{ BadRequestException, HeaderCarrier, HttpResponse }
 
+class RouteException(val message: String) extends Exception(message)
+
 class FileUploadConnector(config: FUConfig, wSHttp: WSHttp, timeProvider: TimeProvider) {
   val helper = new Helper(config, timeProvider)
 
@@ -44,10 +46,11 @@ class FileUploadConnector(config: FUConfig, wSHttp: WSHttp, timeProvider: TimePr
     wSHttp
       .POST[RouteEnvelopeRequest, HttpResponse](s"$baseUrl/file-routing/requests", input, headers)
       // Debug code
-      // simulate routing failure
+      // Simulate routing failure
       .flatMap(_ =>
         Future.failed(new BadRequestException("""{"error":{"msg":"Envelope size exceeds maximum of 26.00 MB"}}""")))
       // End of debug code
+      .recover { case e: BadRequestException => throw new RouteException(e.message) }
       .map(_ => ())
   }
 

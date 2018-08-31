@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.gform.submission
 
+import cats.data.EitherT
 import cats.instances.either._
 import cats.instances.future._
 import cats.instances.list._
@@ -24,7 +25,7 @@ import cats.syntax.traverse._
 import uk.gov.hmrc.gform.core._
 import uk.gov.hmrc.gform.email.EmailService
 import uk.gov.hmrc.gform.exceptions.UnexpectedState
-import uk.gov.hmrc.gform.fileupload.FileUploadService
+import uk.gov.hmrc.gform.fileupload.{ FileUploadService, RouteException }
 import uk.gov.hmrc.gform.form.FormService
 import uk.gov.hmrc.gform.formtemplate.{ FormTemplateService, RepeatingComponentService, SectionHelper }
 import uk.gov.hmrc.gform.sharedmodel.Visibility
@@ -38,6 +39,8 @@ import uk.gov.hmrc.auth.core.AffinityGroup
 import scala.concurrent.{ ExecutionContext, Future }
 import uk.gov.hmrc.http.HeaderCarrier
 import org.apache.pdfbox.pdmodel.PDDocument
+
+import scala.util.{ Failure, Success }
 
 class SubmissionService(
   pdfGeneratorService: PdfGeneratorService,
@@ -133,6 +136,11 @@ class SubmissionService(
     case _                                  => Future.failed(new Exception(s"Form $FormId status is not signed"))
   }
 
+  def fromFutureARecovering[A](fa: Future[A])(implicit ec: ExecutionContext): FOpt[A] =
+    fromFutureOptA(
+      fa.map(Right[UnexpectedState, A])
+        .recover{ case e: RouteException => Left(UnexpectedState(e.message))})
+
   def submission(formId: FormId, customerId: String, affinityGroup: Option[AffinityGroup])(
     implicit hc: HeaderCarrier): FOpt[Unit] =
     // format: OFF
@@ -142,7 +150,7 @@ class SubmissionService(
       sectionFormFields   <- fromOptA           (SubmissionServiceHelper.getSectionFormFields(form, formTemplate, affinityGroup))
       submissionAndPdf    <- fromFutureA        (getSubmissionAndPdf(form.envelopeId, form, sectionFormFields, formTemplate, customerId))
       numberOfAttachments =                     sectionFormFields.map(_.numberOfFiles).sum
-      res                 <- fromFutureA        (fileUploadService.submitEnvelope(submissionAndPdf, formTemplate.dmsSubmission, numberOfAttachments))
+      res                 <- fromFutureARecovering (fileUploadService.submitEnvelope(submissionAndPdf, formTemplate.dmsSubmission, numberOfAttachments))
       _                   <-                    submissionRepo.upsert(submissionAndPdf.submission)
       _                   <- fromFutureA        (formService.updateUserData(form._id, UserData(form.formData, form.repeatingGroupStructure, Submitted)))
       emailAddress        =                     email.getEmailAddress(form)
