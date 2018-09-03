@@ -47,10 +47,20 @@ class FileUploadConnector(config: FUConfig, wSHttp: WSHttp, timeProvider: TimePr
       .POST[RouteEnvelopeRequest, HttpResponse](s"$baseUrl/file-routing/requests", input, headers)
       // Debug code
       // Simulate routing failure
-      .flatMap(_ =>
-        Future.failed(new BadRequestException("""{"error":{"msg":"Envelope size exceeds maximum of 26.00 MB"}}""")))
+      .flatMap(_ => {
+        val x = 1
+        val xx = x
+        Future.failed(new BadRequestException("""{"error":{"msg":"Envelope size exceeds maximum of 26.00 MB"}}"""))
+      })
       // End of debug code
-      .recover { case e: BadRequestException => throw new RouteException(e.message) }
+      .recover {
+        case e: BadRequestException => {
+          // TODO we should parse the json, rather than edit text
+          val replaceTrailing = """["}]+$""".r
+          val replaceLeading = """^.+"""".r
+          throw new RouteException(replaceLeading.replaceFirstIn(replaceTrailing.replaceFirstIn(e.message, ""), ""))
+        }
+      }
       .map(_ => ())
   }
 

@@ -44,11 +44,12 @@ class SubmissionController(submissionService: SubmissionService) extends BaseCon
     //TODO validate all sections before submission (whole form)
     //TODO change status of form to 'submitted'
 
-    submissionService
+    val value: FOpt[Unit] = submissionService
       .submission(
         formId,
         getFromHeaders("customerId", request, _.getOrElse("")),
         getFromHeaders("affinityGroup", request, toAffinityGroupO))
+    value
       .fold(_.asBadRequest, _ => NoContent)
   }
 
