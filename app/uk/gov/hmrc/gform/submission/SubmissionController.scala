@@ -51,6 +51,7 @@ class SubmissionController(submissionService: SubmissionService) extends BaseCon
         getFromHeaders("affinityGroup", request, toAffinityGroupO))
     value
       .fold(_.asBadRequest, _ => NoContent)
+      .recover { case _: RouteException => EntityTooLarge }
   }
 
   def submitWithPdf(formId: FormId) = Action.async { implicit request =>
@@ -63,7 +64,10 @@ class SubmissionController(submissionService: SubmissionService) extends BaseCon
             getFromHeaders("customerId", request, _.getOrElse("")),
             getFromHeaders("affinityGroup", request, toAffinityGroupO),
             html)
-          .fold(_.asBadRequest, _ => NoContent)
+          .fold(_.asBadRequest, x => {
+            val xx = x
+            NoContent
+          })
       case None => Future.successful(BadRequest)
     }
   }

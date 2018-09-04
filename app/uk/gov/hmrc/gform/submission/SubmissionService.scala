@@ -145,8 +145,9 @@ class SubmissionService(
       sectionFormFields   <- fromOptA              (SubmissionServiceHelper.getSectionFormFields(form, formTemplate, affinityGroup))
       submissionAndPdf    <- fromFutureA           (getSubmissionAndPdf(form.envelopeId, form, sectionFormFields, formTemplate, customerId))
       numberOfAttachments =                        sectionFormFields.map(_.numberOfFiles).sum
-      res                 <- fromFutureARecovering (fileUploadService.submitEnvelope(submissionAndPdf, formTemplate.dmsSubmission, numberOfAttachments))
-                                           { case e: RouteException => Left(UnexpectedState(e.message))}
+      res                 <- fromFutureA           (fileUploadService.submitEnvelope(submissionAndPdf, formTemplate.dmsSubmission, numberOfAttachments))
+//      res                 <- fromFutureARecovering (fileUploadService.submitEnvelope(submissionAndPdf, formTemplate.dmsSubmission, numberOfAttachments))
+//                                           { case e: RouteException => Left(UnexpectedState(e.message))}
       _                   <-                       submissionRepo.upsert(submissionAndPdf.submission)
       _                   <- fromFutureA           (formService.updateUserData(form._id, UserData(form.formData, form.repeatingGroupStructure, Submitted)))
       emailAddress        =                        email.getEmailAddress(form)
@@ -164,8 +165,9 @@ class SubmissionService(
       submissionAndPdf    <- fromFutureA           (getSubmissionAndPdfWithPdf(form.envelopeId, form, sectionFormFields, pdf ,customerId, formTemplate))
       sectionFormFields   <- fromOptA              (SubmissionServiceHelper.getSectionFormFields(form, formTemplate, affinityGroup))
       numberOfAttachments =                        sectionFormFields.map(_.numberOfFiles).sum
-      res                 <- fromFutureARecovering (fileUploadService.submitEnvelope(submissionAndPdf, formTemplate.dmsSubmission, numberOfAttachments))
-                                           { case e: RouteException => Left(UnexpectedState(e.message))}
+//      res                 <- fromFutureARecovering (fileUploadService.submitEnvelope(submissionAndPdf, formTemplate.dmsSubmission, numberOfAttachments))
+//                                           { case e: RouteException => Left(UnexpectedState(e.message))}
+      res                 <- fromFutureA (fileUploadService.submitEnvelope(submissionAndPdf, formTemplate.dmsSubmission, numberOfAttachments))
       _                   <-                       submissionRepo.upsert(submissionAndPdf.submission)
       _                   <- fromFutureA           (formService.updateUserData(form._id, UserData(form.formData, form.repeatingGroupStructure, Submitted)))
       emailAddress        =                        email.getEmailAddress(form)

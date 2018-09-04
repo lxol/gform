@@ -21,5 +21,9 @@ import play.api.mvc.Results._
 import uk.gov.hmrc.gform.controllers.ErrResponse
 
 case class UnexpectedState(error: String) {
-  def asBadRequest = BadRequest(Json.toJson(ErrResponse(error)))
+  def asBadRequest = {
+    val x = 1
+    val xx = x
+    BadRequest(Json.toJson(ErrResponse(error)))
+  }
 }

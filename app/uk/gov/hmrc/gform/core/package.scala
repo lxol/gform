@@ -16,7 +16,10 @@
 
 package uk.gov.hmrc.gform
 
+import cats.Functor
 import cats.data.EitherT
+import cats.implicits._
+
 import scala.concurrent.{ ExecutionContext, Future }
 import uk.gov.hmrc.gform.exceptions.UnexpectedState
 

@@ -25,7 +25,7 @@ import uk.gov.hmrc.gform.wshttp.WSHttp
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ BadRequestException, HeaderCarrier, HttpResponse }
+import uk.gov.hmrc.http.{ BadRequestException, HeaderCarrier, HttpResponse, RequestEntityTooLargeException }
 
 class RouteException(val message: String) extends Exception(message)
 
@@ -54,11 +54,8 @@ class FileUploadConnector(config: FUConfig, wSHttp: WSHttp, timeProvider: TimePr
       })
       // End of debug code
       .recover {
-        case e: BadRequestException => {
-          // TODO we should parse the json, rather than edit text
-          val replaceTrailing = """["}]+$""".r
-          val replaceLeading = """^.+"""".r
-          throw new RouteException(replaceLeading.replaceFirstIn(replaceTrailing.replaceFirstIn(e.message, ""), ""))
+        case e: BadRequestException if e.message.contains("Envelope size exceeds maximum") => {
+          throw new RouteException("Envelope size exceeds maximum")
         }
       }
       .map(_ => ())
