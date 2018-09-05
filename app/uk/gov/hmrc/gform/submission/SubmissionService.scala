@@ -175,6 +175,13 @@ class SubmissionService(
     } yield res
     // format: ON
 
+  def unseal(formId: FormId)(implicit hc: HeaderCarrier): Future[Unit] = {
+    for {
+      form <- getSignedForm(formId)
+      _ <- fileUploadService.unsealEnvelope(form.envelopeId)
+    } yield { }
+  }
+
   def submissionDetails(formId: FormId)(implicit ec: ExecutionContext): Future[Submission] =
     submissionRepo.get(formId.value)
 

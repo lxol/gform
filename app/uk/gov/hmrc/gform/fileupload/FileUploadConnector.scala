@@ -61,6 +61,14 @@ class FileUploadConnector(config: FUConfig, wSHttp: WSHttp, timeProvider: TimePr
       .map(_ => ())
   }
 
+  def unsealEnvelope(input: UnsealEnvelopeRequest)(implicit hc: HeaderCarrier): Future[Unit] = {
+    Logger.info(s"unseal envelope, input: '${input.envelopeId.value}, ${loggingHelpers.cleanHeaderCarrierHeader(hc)} ")
+    wSHttp
+      .POST[UnsealEnvelopeRequest, HttpResponse](s"$baseUrl/commands/unsealenvelope", input, headers)
+      .map(_ => ())
+  }
+
+
   def getEnvelope(envelopeId: EnvelopeId)(implicit hc: HeaderCarrier): Future[Envelope] = {
     Logger.info(s"get envelope, envelopeId: '${envelopeId.value}', ${loggingHelpers.cleanHeaderCarrierHeader(hc)}")
     wSHttp.GET[Envelope](s"$baseUrl/file-upload/envelopes/${envelopeId.value}")

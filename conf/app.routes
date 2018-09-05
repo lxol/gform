@@ -11,6 +11,7 @@ DELETE        /forms/:formId/deleteFile/:fileId                    uk.gov.hmrc.g
 
 POST          /forms/:formId/submission                            uk.gov.hmrc.gform.submission.SubmissionController.submit(formId: FormId)
 POST          /forms/:formId/submission-pdf                        uk.gov.hmrc.gform.submission.SubmissionController.submitWithPdf(formId: FormId)
+POST          /forms/:formId/unseal-submission                     uk.gov.hmrc.gform.submission.SubmissionController.unseal(formId: FormId)
 GET           /forms/:formId/submission                            uk.gov.hmrc.gform.submission.SubmissionController.submissionStatus(formId: FormId)
 
 GET           /formtemplates                                       uk.gov.hmrc.gform.formtemplate.FormTemplatesController.all

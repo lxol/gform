@@ -72,6 +72,12 @@ class SubmissionController(submissionService: SubmissionService) extends BaseCon
     }
   }
 
+  def unseal(formId: FormId) = Action.async { implicit request =>
+    Logger.info(
+      s"unsealing, formId: '${formId.value}, ${loggingHelpers.cleanHeaders(request.headers)}")
+    submissionService.unseal(formId).map ( _ => NoContent)
+  }
+
   def submissionStatus(formId: FormId) = Action.async { implicit request =>
     Logger.info(
       s"checking submission status, formId: '${formId.value}, ${loggingHelpers.cleanHeaders(request.headers)}")

@@ -48,6 +48,23 @@ object ReconciliationId {
   }
 }
 
+case class UnsealEnvelopeRequest(envelopeId: EnvelopeId)
+
+object UnsealEnvelopeRequest {
+
+  private val macrowrites = Json.writes[UnsealEnvelopeRequest]
+
+  val owrites = OWrites[UnsealEnvelopeRequest] { r =>
+    macrowrites.writes(r) ++
+      EnvelopeId.format.writes(r.envelopeId) //this will override envelopeId
+  }
+
+  val reads = Json.reads[UnsealEnvelopeRequest]
+
+  implicit val format = OFormat(reads, owrites)
+}
+
+
 case class RouteEnvelopeRequest(envelopeId: EnvelopeId, application: String, destination: String)
 
 object RouteEnvelopeRequest {

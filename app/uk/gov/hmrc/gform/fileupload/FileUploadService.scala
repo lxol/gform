@@ -94,6 +94,9 @@ class FileUploadService(
 
   def deleteFile(envelopeId: EnvelopeId, fileId: FileId)(implicit hc: HeaderCarrier) =
     fileUploadConnector.deleteFile(envelopeId, fileId)
+
+  def unsealEnvelope(envelopeId: EnvelopeId)(implicit hc: HeaderCarrier) =
+    fileUploadConnector.unsealEnvelope(UnsealEnvelopeRequest(envelopeId))
 }
 
 object FileUploadService {
