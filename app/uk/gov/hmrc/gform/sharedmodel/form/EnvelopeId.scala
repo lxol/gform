@@ -24,4 +24,7 @@ case class EnvelopeId(value: String)
 object EnvelopeId {
   implicit val format: OFormat[EnvelopeId] = ValueClassFormat.oformat("envelopeId", EnvelopeId.apply, _.value)
   val vformat: Format[EnvelopeId] = ValueClassFormat.vformat("envelopeId", EnvelopeId.apply, x => JsString(x.value))
+
+  // TODO there muusr be a cleaner way of doing this for UnsealRequest
+  val unsealformat: OFormat[EnvelopeId] = ValueClassFormat.oformat("id", EnvelopeId.apply, _.value)
 }

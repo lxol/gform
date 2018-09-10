@@ -47,11 +47,11 @@ class FileUploadConnector(config: FUConfig, wSHttp: WSHttp, timeProvider: TimePr
       .POST[RouteEnvelopeRequest, HttpResponse](s"$baseUrl/file-routing/requests", input, headers)
       // Debug code
       // Simulate routing failure
-      .flatMap(_ => {
-        val x = 1
-        val xx = x
-        Future.failed(new BadRequestException("""{"error":{"msg":"Envelope size exceeds maximum of 26.00 MB"}}"""))
-      })
+//      .flatMap(_ => {
+//        val x = 1
+//        val xx = x
+//        Future.failed(new BadRequestException("""{"error":{"msg":"Envelope size exceeds maximum of 26.00 MB"}}"""))
+//      })
       // End of debug code
       .recover {
         case e: BadRequestException if e.message.contains("Envelope size exceeds maximum") => {
@@ -62,12 +62,11 @@ class FileUploadConnector(config: FUConfig, wSHttp: WSHttp, timeProvider: TimePr
   }
 
   def unsealEnvelope(input: UnsealEnvelopeRequest)(implicit hc: HeaderCarrier): Future[Unit] = {
-    Logger.info(s"unseal envelope, input: '${input.envelopeId.value}, ${loggingHelpers.cleanHeaderCarrierHeader(hc)} ")
+    Logger.info(s"unseal envelope, input: '${input.id.value}, ${loggingHelpers.cleanHeaderCarrierHeader(hc)} ")
     wSHttp
-      .POST[UnsealEnvelopeRequest, HttpResponse](s"$baseUrl/commands/unsealenvelope", input, headers)
+      .POST[UnsealEnvelopeRequest, HttpResponse](s"$baseUrl/file-upload/commands/unsealenvelope", input, headers)
       .map(_ => ())
   }
-
 
   def getEnvelope(envelopeId: EnvelopeId)(implicit hc: HeaderCarrier): Future[Envelope] = {
     Logger.info(s"get envelope, envelopeId: '${envelopeId.value}', ${loggingHelpers.cleanHeaderCarrierHeader(hc)}")
