@@ -65,15 +65,15 @@ class Helper(config: FUConfig, timeProvider: TimeProvider) {
 
     Logger.info(s"time.plusHours(expiryDays * 24) ${timePlus2.format(formatter)}")
 
-    val timePlus3 = time.plusYears(1).minusDays(365 - expiryDays)  // This will yield one day more before and during a leap year
+    val timePlus3 = time.plusYears(1).minusDays(365 - expiryDays) // This will yield one day more before and during a leap year
 
     Logger.info(s"time.plusYears(1).minusDays(365 - expiryDays) ${timePlus3.format(formatter)}")
 
-    val timePlus4 = time.plusDays(expiryDays * 2).minusDays(expiryDays)  // this might go wrong at the start of November next year
+    val timePlus4 = time.plusDays(expiryDays * 2).minusDays(expiryDays) // this might go wrong at the start of November next year
 
     Logger.info(s"time.plusDays(expiryDays * 2).minusDays(expiryDays) ${timePlus4.format(formatter)}")
 
-    val timePlus5 = time.minusYears(1).plusDays(expiryDays).plusYear(1) // this should work until 2020
+    val timePlus5 = time.minusYears(1).plusDays(expiryDays).plusYears(1) // this should work until 2020
 
     Logger.info(s"time.minusYears(1).plusDays(expiryDays).plusYear(1) ${timePlus5.format(formatter)}")
 
