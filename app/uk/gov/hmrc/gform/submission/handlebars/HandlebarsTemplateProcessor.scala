@@ -23,13 +23,12 @@ class HandlebarsTemplateProcessor {
   handlebars.registerHelpers(new HandlebarsTemplateProcessorHelpers())
 
   def apply(template: String, model: HandlebarsTemplateProcessorModel): String = {
+    println("booo" + template)
     val compiledTemplate = handlebars.compileInline(template)
-
     val context = Context
       .newBuilder(model.model)
       .resolver(JsonNodeValueResolver.INSTANCE)
       .build
-
     MagicCommasParser(compiledTemplate.apply(context))
   }
 }
