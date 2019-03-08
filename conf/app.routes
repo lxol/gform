@@ -8,7 +8,7 @@ GET           /forms/:formId                                       uk.gov.hmrc.g
 GET           /forms/:formId/validate-section/:sectionNumber       uk.gov.hmrc.gform.form.FormController.validateSection(formId: FormId, sectionNumber: SectionNumber)
 POST          /forms/:formId/delete                                uk.gov.hmrc.gform.form.FormController.delete(formId: FormId)
 
-POST          /forms/:formId/enrolment-callback                     uk.gov.hmrc.gform.form.FormController.enrolmentCallBack(formId: FormId)
+POST          /forms/:formId/enrolment-callback                    uk.gov.hmrc.gform.form.FormController.enrolmentCallBack(formId: FormId)
 
 DELETE        /forms/:formId/deleteFile/:fileId                    uk.gov.hmrc.gform.form.FormController.deleteFile(formId: FormId, fileId: FileId)
 
@@ -29,3 +29,6 @@ POST          /validate/bank                                       uk.gov.hmrc.g
 POST          /dms/submit                                          uk.gov.hmrc.gform.dms.DmsSubmissionController.submitToDms()
 
 POST          /obligation/tax-period                               uk.gov.hmrc.gform.obligation.ObligationController.getAllTaxPeriods()
+
+POST          /forms/:formId/handlebarsModel                       uk.gov.hmrc.gform.submission.handlebars.HandlebarsController.handlebarsModelWithFrontEndVariables(formId: FormId)
+GET           /forms/:formId/handlebarsModel                       uk.gov.hmrc.gform.submission.handlebars.HandlebarsController.handlebarsModelWithoutFrontEndVariables(formId: FormId)

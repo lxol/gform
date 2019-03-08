@@ -77,7 +77,7 @@ class ApplicationModule(context: Context) extends BuiltInComponentsFromContext(c
     new FormModule(configModule, mongoModule, shortLivedCacheModule, formTemplateModule, fileUploadModule)
   private val validationModule = new ValidationModule(wSHttpModule, configModule)
 
-  private val handlebarsModule = new HandlebarsHttpApiModule(wSHttpModule, configModule)
+  private val handlebarsModule = new HandlebarsHttpApiModule(wSHttpModule, configModule, formModule, formTemplateModule)
   private val submissionModule =
     new SubmissionModule(
       configModule,
@@ -107,7 +107,8 @@ class ApplicationModule(context: Context) extends BuiltInComponentsFromContext(c
     submissionModule,
     validationModule,
     dmsModule,
-    obligationModule
+    obligationModule,
+    handlebarsModule
   )
 
   override lazy val httpErrorHandler: HttpErrorHandler = playComponentsModule.errorHandler

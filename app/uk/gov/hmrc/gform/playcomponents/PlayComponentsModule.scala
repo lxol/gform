@@ -30,6 +30,7 @@ import uk.gov.hmrc.gform.formtemplate.FormTemplateModule
 import uk.gov.hmrc.gform.metrics.MetricsModule
 import uk.gov.hmrc.gform.obligation.ObligationModule
 import uk.gov.hmrc.gform.submission.SubmissionModule
+import uk.gov.hmrc.gform.submission.handlebars.HandlebarsHttpApiModule
 import uk.gov.hmrc.gform.testonly.TestOnlyModule
 import uk.gov.hmrc.gform.validation.ValidationModule
 import uk.gov.hmrc.gform.wshttp.WSHttp
@@ -58,7 +59,8 @@ class PlayComponentsModule(
   submissionModule: SubmissionModule,
   validationModule: ValidationModule,
   dmsModule: DmsModule,
-  obligationModule: ObligationModule) {
+  obligationModule: ObligationModule,
+  handlebarsModule: HandlebarsHttpApiModule) {
 
   lazy val loggingFilter = new LoggingFilter {
     override def mat: Materializer = akkaModule.materializer
@@ -82,7 +84,8 @@ class PlayComponentsModule(
     configModule.configController,
     validationModule.validationController,
     dmsModule.dmsSubmissionController,
-    obligationModule.obligationController
+    obligationModule.obligationController,
+    handlebarsModule.handlebarsController
   )
 
   val healthController = new HealthController(configModule.playConfiguration, playComponents.context.environment)

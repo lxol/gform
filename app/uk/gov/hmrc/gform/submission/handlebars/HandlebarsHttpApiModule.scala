@@ -18,13 +18,19 @@ package uk.gov.hmrc.gform.submission.handlebars
 
 import uk.gov.hmrc.gform.config.ConfigModule
 import uk.gov.hmrc.gform.core.{ FOpt, fOptMonadError }
+import uk.gov.hmrc.gform.form.FormModule
+import uk.gov.hmrc.gform.formtemplate.FormTemplateModule
 import uk.gov.hmrc.gform.wshttp._
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.gform.wshttp.HttpClient.HttpClientBuildingSyntax
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class HandlebarsHttpApiModule(wSHttpModule: WSHttpModule, configModule: ConfigModule) {
+class HandlebarsHttpApiModule(
+  wSHttpModule: WSHttpModule,
+  configModule: ConfigModule,
+  formModule: FormModule,
+  formTemplateModule: FormTemplateModule) {
 
   private val rootHttpClient: HttpClient[FOpt] =
     new AuditingHttpClient(wSHttpModule.auditableWSHttp)
@@ -69,4 +75,7 @@ class HandlebarsHttpApiModule(wSHttpModule: WSHttpModule, configModule: ConfigMo
 
   val handlebarsHttpSubmitter: HandlebarsHttpApiSubmitter[FOpt] =
     new RealHandlebarsHttpApiSubmitter(desHttpClient, mdgHttpClient, mdtpHttpClientMap)
+
+  val handlebarsController: HandlebarsController =
+    new HandlebarsController(formModule.formService, formTemplateModule.formTemplateService)
 }

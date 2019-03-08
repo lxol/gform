@@ -18,7 +18,7 @@ package uk.gov.hmrc.gform.submission
 
 import cats.implicits._
 import play.api.Logger
-import play.api.mvc.{ Action, AnyContent, Request }
+import play.api.mvc.Action
 import uk.gov.hmrc.gform.auditing.loggingHelpers
 import uk.gov.hmrc.gform.controllers.BaseController
 import uk.gov.hmrc.gform.sharedmodel.AffinityGroupUtil._
@@ -47,7 +47,4 @@ class SubmissionController(submissionService: SubmissionService) extends BaseCon
 
     submissionService.submissionDetails(formId).asOkJson
   }
-
-  private def getFromHeaders[A](header: String, request: Request[AnyContent], f: Option[String] => A): A =
-    f(request.headers.get(header))
 }
