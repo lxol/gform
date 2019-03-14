@@ -19,7 +19,7 @@ package uk.gov.hmrc.gform.core
 import uk.gov.hmrc.gform.Spec
 import uk.gov.hmrc.gform.formtemplate.FormTemplateValidator
 import uk.gov.hmrc.gform.sharedmodel.formtemplate._
-import cats.data.NonEmptyList
+import cats.data.{ NonEmptyList, Validated }
 import org.scalacheck.Gen
 import uk.gov.hmrc.gform.sharedmodel.form.FormField
 import uk.gov.hmrc.gform.sharedmodel.formtemplate.destinations.Destinations
@@ -50,6 +50,74 @@ class TemplateValidatorSpec extends Spec {
       result should be(Invalid(FormTemplateValidator.someFieldsAreDefinedMoreThanOnce(Set(id1, id2))))
     }
   }
+
+  "validateUniqueFields" should "return an error when there are duplicate field ids within a group" in {
+
+    val duplicateFieldId = mkFormComponent("bing", Value)
+    val formComponent = mkFormComponent("group", Group(List(duplicateFieldId, duplicateFieldId), Vertical))
+    val section = mkSection("section", List(formComponent))
+    val result = FormTemplateValidator.validateUniqueFields(List(section))
+    result should be(
+      Invalid(FormTemplateValidator.someFieldsAreDefinedMoreThanOnce(Set(duplicateFieldId.id, duplicateFieldId.id))))
+  }
+
+  it should "return valid when there are not duplicate field ids within a group" in {
+
+    val formComponent1 = mkFormComponent("bing", Value)
+    val formComponent2 = mkFormComponent("bong", Value)
+    val groupFormComponent = mkFormComponent("group", Group(List(formComponent1, formComponent2), Vertical))
+    val section = mkSection("section", List(groupFormComponent))
+    val result = FormTemplateValidator.validateUniqueFields(List(section))
+    result should be(Valid)
+  }
+
+  it should "return invalid when two groups have the same Id but distinct form components" in {
+
+    val formComponent1 = mkFormComponent("bing", Value)
+    val formComponent2 = mkFormComponent("bong", Value)
+    val groupFormComponent1 = mkFormComponent("group", Group(List(formComponent1), Vertical))
+    val groupFormComponent2 = mkFormComponent("group", Group(List(formComponent2), Vertical))
+    val section = mkSection("section", List(groupFormComponent1, groupFormComponent2))
+    val result = FormTemplateValidator.validateUniqueFields(List(section))
+
+    result should be(
+      Invalid(
+        FormTemplateValidator.someFieldsAreDefinedMoreThanOnce(Set(groupFormComponent1.id, groupFormComponent2.id))))
+  }
+
+  it should "return invalid when two groups have the same Id but distinct form components" in {
+
+    val formComponent1 = mkFormComponent("bing", Value)
+    val formComponent2 = mkFormComponent("bong", Value)
+    val groupFormComponent1 = mkFormComponent("group", Group(List(formComponent1), Vertical))
+    val groupFormComponent2 = mkFormComponent("group", Group(List(formComponent2), Vertical))
+    val section = mkSection("section", List(groupFormComponent1, groupFormComponent2))
+    val result = FormTemplateValidator.validateUniqueFields(List(section))
+
+    result should be(
+      Invalid(
+        FormTemplateValidator.someFieldsAreDefinedMoreThanOnce(Set(groupFormComponent1.id, groupFormComponent2.id))))
+  }
+
+//  it should "all return valid in table" in {
+//
+//    val formComponent: String => FormComponent = formId => mkFormComponent(formId, Value)
+//
+//    def groupFormComponent(formComponents: FormComponent*): List[FormComponent] =
+//      List(mkFormComponent("group", Group(formComponents.toList, Vertical)))
+//
+//    val section: List[FormComponent] => List[Section] = formComponents => mkSection("section", formComponents)
+//
+//    val result: List[Section] => ValidationResult = sections =>  FormTemplateValidator.validateUniqueFields(sections)
+//
+//    val table =
+//      Table(
+//        ("actual", "expected"),
+//        (result(section(groupFormComponent(formComponent("bing"), formComponent("bong")))), Valid)
+//      )
+//
+//
+//  }
 
   "validateUniqueDestinationIds" should "return an error when there are duplicate ids" in {
     import DestinationGen._
