@@ -85,20 +85,6 @@ class TemplateValidatorSpec extends Spec {
         FormTemplateValidator.someFieldsAreDefinedMoreThanOnce(Set(groupFormComponent1.id, groupFormComponent2.id))))
   }
 
-  it should "return invalid when two groups have the same Id but distinct form components" in {
-
-    val formComponent1 = mkFormComponent("bing", Value)
-    val formComponent2 = mkFormComponent("bong", Value)
-    val groupFormComponent1 = mkFormComponent("group", Group(List(formComponent1), Vertical))
-    val groupFormComponent2 = mkFormComponent("group", Group(List(formComponent2), Vertical))
-    val section = mkSection("section", List(groupFormComponent1, groupFormComponent2))
-    val result = FormTemplateValidator.validateUniqueFields(List(section))
-
-    result should be(
-      Invalid(
-        FormTemplateValidator.someFieldsAreDefinedMoreThanOnce(Set(groupFormComponent1.id, groupFormComponent2.id))))
-  }
-
 //  it should "all return valid in table" in {
 //
 //    val formComponent: String => FormComponent = formId => mkFormComponent(formId, Value)
