@@ -22,6 +22,7 @@ import play.api.mvc.Action
 import uk.gov.hmrc.gform.auditing.loggingHelpers
 import uk.gov.hmrc.gform.controllers.BaseController
 import uk.gov.hmrc.gform.sharedmodel.{ HmrcTaxPeriodWithEvaluatedId, TaxResponse }
+import uk.gov.hmrc.gform.sharedmodel.formtemplate.JsonUtils._
 
 import scala.concurrent.{ ExecutionContext, Future }
 

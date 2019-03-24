@@ -20,7 +20,7 @@ import julienrf.json.derived
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import uk.gov.hmrc.gform.sharedmodel.{ NotChecked, Obligations, RetrievedObligations, TaxPeriodInformation, UserId }
+import uk.gov.hmrc.gform.sharedmodel.UserId
 import uk.gov.hmrc.gform.sharedmodel.formtemplate.FormTemplateId
 
 case class VisitIndex(visitsIndex: Set[Int]) extends AnyVal
@@ -42,24 +42,13 @@ case class Form(
   status: FormStatus,
   visitsIndex: VisitIndex,
   thirdPartyData: ThirdPartyData,
-  envelopeExpiryDate: Option[EnvelopeExpiryDate],
-  obligations: Obligations
+  envelopeExpiryDate: Option[EnvelopeExpiryDate]
 )
 
 object Form {
 
   val readVisitIndex: Reads[VisitIndex] =
     (__ \ "visitsIndex").readNullable[List[Int]].map(a => VisitIndex(a.fold(Set.empty[Int])(_.toSet)))
-
-  val readerRetreived: Reads[Option[Obligations]] = (__ \ "RetrievedObligations" \ "listOfObligations")
-    .readNullable[List[TaxPeriodInformation]]
-    .map(_.map(RetrievedObligations))
-  val readerStandard: Reads[Option[Obligations]] =
-    (__ \ "obligations").readNullable[List[TaxPeriodInformation]].map(_.map(RetrievedObligations))
-  val readObligations: Reads[Obligations] =
-    readerRetreived.orElse(readerStandard).map { a =>
-      a.getOrElse(NotChecked)
-    }
 
   private val reads: Reads[Form] = ((FormId.format: Reads[FormId]) and
     EnvelopeId.format and
@@ -69,8 +58,7 @@ object Form {
     FormStatus.format and
     readVisitIndex and
     ThirdPartyData.format and
-    EnvelopeExpiryDate.optionFormat and
-    readObligations)(Form.apply _)
+    EnvelopeExpiryDate.optionFormat)(Form.apply _)
 
   private val writes: OWrites[Form] = OWrites[Form](
     form =>
@@ -82,8 +70,7 @@ object Form {
         FormStatus.format.writes(form.status) ++
         VisitIndex.format.writes(form.visitsIndex) ++
         ThirdPartyData.format.writes(form.thirdPartyData) ++
-        EnvelopeExpiryDate.optionFormat.writes(form.envelopeExpiryDate) ++
-        Obligations.format.writes(form.obligations)
+        EnvelopeExpiryDate.optionFormat.writes(form.envelopeExpiryDate)
   )
 
   implicit val format: OFormat[Form] = OFormat[Form](reads, writes)

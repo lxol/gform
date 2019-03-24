@@ -18,9 +18,10 @@ package uk.gov.hmrc.gform.form
 
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.gform.save4later.Save4Later
+import uk.gov.hmrc.gform.sharedmodel.ObligationsResponse
 import uk.gov.hmrc.gform.sharedmodel.form._
 import uk.gov.hmrc.gform.sharedmodel.formtemplate.{ EmailParametersRecalculated, FormTemplateId }
-import uk.gov.hmrc.gform.sharedmodel.{ NotChecked, UserId }
+import uk.gov.hmrc.gform.sharedmodel.UserId
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ ExecutionContext, Future }
@@ -49,8 +50,7 @@ class FormService(save4Later: Save4Later)(implicit ex: ExecutionContext) {
       InProgress,
       VisitIndex.empty,
       ThirdPartyData.empty,
-      Some(envelopeExpiryDate),
-      NotChecked
+      Some(envelopeExpiryDate)
     )
     save4Later.upsert(formId, form)
   }
@@ -63,8 +63,7 @@ class FormService(save4Later: Save4Later)(implicit ex: ExecutionContext) {
           formData = userData.formData,
           status = newStatus(form, userData.formStatus),
           visitsIndex = userData.visitsIndex,
-          thirdPartyData = userData.thirdPartyData,
-          obligations = userData.obligations
+          thirdPartyData = userData.thirdPartyData
         )
       _ <- save4Later.upsert(formId, newForm)
     } yield ()
