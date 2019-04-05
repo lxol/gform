@@ -27,6 +27,7 @@ import uk.gov.hmrc.gform.core.Opt
 import uk.gov.hmrc.gform.core.parsers.{ FormatParser, PresentationHintParser, ValueParser }
 import uk.gov.hmrc.gform.exceptions.UnexpectedState
 import uk.gov.hmrc.gform.sharedmodel.formtemplate.DisplayWidth.DisplayWidth
+import uk.gov.hmrc.gform.sharedmodel.formtemplate.UpperCaseBoolean
 import uk.gov.hmrc.gform.sharedmodel.formtemplate.RoundingMode._
 import uk.gov.hmrc.gform.sharedmodel.formtemplate._
 
@@ -66,6 +67,7 @@ class FormComponentMaker(json: JsValue) {
   lazy val mandatory: Option[String] = (json \ "mandatory").asOpt[String]
   lazy val multiline: Option[String] = (json \ "multiline").asOpt[String]
   lazy val displayWidth: Option[String] = (json \ "displayWidth").asOpt[String]
+  // lazy val testJoeSwanson: Option[String] = (json \ "toUpperCase").asOpt[String]
   lazy val roundingMode: RoundingMode = (json \ "round").asOpt[RoundingMode].getOrElse(RoundingMode.defaultRoundingMode)
   lazy val multivalue: Option[String] = (json \ "multivalue").asOpt[String]
   lazy val total: Option[String] = (json \ "total").asOpt[String]
@@ -203,6 +205,14 @@ class FormComponentMaker(json: JsValue) {
         case Some("xl")  => Some(DisplayWidth.XL)
         case Some("xxl") => Some(DisplayWidth.XXL)
         case _           => Some(DisplayWidth.DEFAULT)
+      }
+  }
+  final object ToUpperCase {
+    def unapply(isUpperCase: Option[String]): UpperCaseBoolean =
+      isUpperCase match {
+        case Some("true")  => IsUpperCase
+        case Some("false") => IsNotUpperCase
+        case _             => IsNotUpperCase
       }
   }
 

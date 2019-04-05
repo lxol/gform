@@ -30,7 +30,11 @@ sealed trait MultiField {
 }
 sealed trait ComponentType
 
-case class Text(constraint: TextConstraint, value: Expr, displayWidth: DisplayWidth = DisplayWidth.DEFAULT)
+case class Text(
+  constraint: TextConstraint,
+  value: Expr,
+  displayWidth: DisplayWidth = DisplayWidth.DEFAULT,
+  toUpperCase: Boolean = false)
     extends ComponentType
 
 case class TextArea(constraint: TextConstraint, value: Expr, displayWidth: DisplayWidth = DisplayWidth.DEFAULT)
@@ -70,6 +74,17 @@ object DisplayWidth extends Enumeration {
 
   implicit val displayWidthReads = Reads.enumNameReads(DisplayWidth)
   implicit val displayWidthWrites = Writes.enumNameWrites
+}
+sealed trait UpperCaseBoolean
+
+case object IsUpperCase extends UpperCaseBoolean
+case object IsNotUpperCase extends UpperCaseBoolean
+
+object UpperCaseBoolean {
+  def test(bool: Boolean): UpperCaseBoolean = bool match {
+    case true  => IsUpperCase
+    case false => IsNotUpperCase
+  }
 }
 
 case class Choice(
@@ -153,7 +168,6 @@ object ComponentType {
   implicit def writesNonEmptyList[T: Writes] = Writes[NonEmptyList[T]] { v =>
     JsArray((v.head :: v.tail).map(Json.toJson(_)).toList)
   }
-
   implicit val format: OFormat[ComponentType] = derived.oformat
 
 }
