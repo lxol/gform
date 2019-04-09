@@ -190,6 +190,7 @@ object FormTemplateValidator {
     case Date(_, _, _)                 => Valid
     case Address(_)                    => Valid
     case Choice(_, _, _, _, _)         => Valid
+    case RevealingChoice(_, _, _)      => Valid
     case HmrcTaxPeriod(_, _, _)        => Valid
     case Group(fvs, _, _, _, _, _)     => validate(fvs.map(_.`type`), formTemplate)
     case FileUpload()                  => Valid

@@ -19,6 +19,7 @@ import cats.data.NonEmptyList
 import org.scalacheck.Gen
 import uk.gov.hmrc.gform.sharedmodel.formtemplate.DisplayWidth.DisplayWidth
 import uk.gov.hmrc.gform.sharedmodel.formtemplate._
+import uk.gov.hmrc.gform.sharedmodel.formtemplate.generators.FormComponentGen
 
 trait ComponentTypeGen {
   def displayWidthGen: Gen[DisplayWidth] = Gen.oneOf(DisplayWidth.values.toSeq)
@@ -60,6 +61,13 @@ trait ComponentTypeGen {
       selections  <- PrimitiveGen.zeroOrMoreGen(Gen.posNum[Int])
       helpText    <- Gen.option(PrimitiveGen.zeroOrMoreGen(PrimitiveGen.nonEmptyAlphaNumStrGen))
     } yield Choice(tpe, options, orientation, selections, helpText)
+
+  def revealingChoiceGen: Gen[RevealingChoice]=
+    for {
+      options     <- PrimitiveGen.nonEmptyAlphaNumStrGen.map(NonEmptyList.of(_))
+      selections  <- PrimitiveGen.zeroOrMoreGen(Gen.posNum[Int])
+      hiddenField <- PrimitiveGen.zeroOrMoreGen(PrimitiveGen.zeroOrMoreGen(FormComponentGen.formComponentGen()))
+    }yield RevealingChoice(options,selections,hiddenField)
 
   def groupGen(maxDepth: Int): Gen[Group] =
     for {
