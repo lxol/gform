@@ -27,10 +27,9 @@ import uk.gov.hmrc.gform.core.Opt
 import uk.gov.hmrc.gform.core.parsers.{ FormatParser, PresentationHintParser, ValueParser }
 import uk.gov.hmrc.gform.exceptions.UnexpectedState
 import uk.gov.hmrc.gform.sharedmodel.formtemplate.DisplayWidth.DisplayWidth
-import uk.gov.hmrc.gform.sharedmodel.formtemplate.UpperCaseBoolean
 import uk.gov.hmrc.gform.sharedmodel.formtemplate.RoundingMode._
 import uk.gov.hmrc.gform.sharedmodel.formtemplate._
-
+import uk.gov.hmrc.gform.formtemplate.FormComponentMakerService._
 case class MES(
   mandatory: Boolean,
   editable: Boolean,
@@ -38,7 +37,7 @@ case class MES(
   derived: Boolean,
   onlyShowOnSummary: Boolean = false)
 
-class FormComponentMaker(json: JsValue) {
+class FormComponentMaker(json: JsValue) { //variablesBuilder
 
   lazy val id: FormComponentId = (json \ "id").as[FormComponentId]
   lazy val `type`: Option[ComponentTypeRaw] = (json \ "type").asOpt[ComponentTypeRaw]
@@ -67,7 +66,7 @@ class FormComponentMaker(json: JsValue) {
   lazy val mandatory: Option[String] = (json \ "mandatory").asOpt[String]
   lazy val multiline: Option[String] = (json \ "multiline").asOpt[String]
   lazy val displayWidth: Option[String] = (json \ "displayWidth").asOpt[String]
-  // lazy val testJoeSwanson: Option[String] = (json \ "toUpperCase").asOpt[String]
+  lazy val toUpperCase: Option[String] = (json \ "toUpperCase").asOpt[String]
   lazy val roundingMode: RoundingMode = (json \ "round").asOpt[RoundingMode].getOrElse(RoundingMode.defaultRoundingMode)
   lazy val multivalue: Option[String] = (json \ "multivalue").asOpt[String]
   lazy val total: Option[String] = (json \ "total").asOpt[String]
@@ -148,6 +147,13 @@ class FormComponentMaker(json: JsValue) {
     case Some(HmrcTaxPeriodRaw) => hmrcTaxPeriodOpt
     //TODO: What if there is None
   }
+  private lazy val textOpt2: Opt[ComponentType] = {
+    for {
+    maybeFormatExpr <- optMaybeFormatExpr(roundingMode)
+    maybeValueExpr  <- optMaybeValueExpr
+    result <- createTextObject(maybeFormatExpr,maybeValueExpr,multiline,displayWidth,toUpperCase)}
+    yield result
+    }
 
   private lazy val textOpt: Opt[ComponentType] = {
     for {
@@ -195,6 +201,8 @@ class FormComponentMaker(json: JsValue) {
     } yield result
   }
 
+
+
   private final object HasDisplayWidth {
     def unapply(displayWidth: Option[String]): Option[DisplayWidth] =
       displayWidth match {
@@ -208,11 +216,11 @@ class FormComponentMaker(json: JsValue) {
       }
   }
   final object ToUpperCase {
-    def unapply(isUpperCase: Option[String]): UpperCaseBoolean =
+    def unapply(isUpperCase: Option[String]): Option[Boolean] =
       isUpperCase match {
-        case Some("true")  => IsUpperCase
-        case Some("false") => IsNotUpperCase
-        case _             => IsNotUpperCase
+        case Some("true")  => Some(true)
+        case Some("false") => Some(false)
+        case _             => Some(false)
       }
   }
 
@@ -427,7 +435,7 @@ class FormComponentMaker(json: JsValue) {
       }
   }
 
-  private final object HasTextExpression {
+   final object HasTextExpression {
     def unapply(valueExp: Option[ValueExpr]): Option[Expr] =
       valueExp match {
         case Some(TextExpression(expr)) => Some(expr)
@@ -436,7 +444,7 @@ class FormComponentMaker(json: JsValue) {
       }
   }
 
-  private final object IsMultiline {
+   final object IsMultiline {
     def unapply(multiline: Option[String]): Boolean =
       multiline match {
         case Some(IsTrueish()) => true
@@ -444,7 +452,7 @@ class FormComponentMaker(json: JsValue) {
       }
   }
 
-  private final object IsNotMultiline {
+   final object IsNotMultiline {
     def unapply(multiline: Option[String]): Boolean = !IsMultiline.unapply(multiline)
   }
 
@@ -531,4 +539,9 @@ class FormComponentMaker(json: JsValue) {
 
     } yield res
   }
+}
+
+object FormComponentMaker {
+  import uk.gov.hmrc.gform.formtemplate.
+
 }
