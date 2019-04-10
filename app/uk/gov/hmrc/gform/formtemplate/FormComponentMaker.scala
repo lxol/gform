@@ -149,11 +149,11 @@ class FormComponentMaker(json: JsValue) { //variablesBuilder
   }
   private lazy val textOpt2: Opt[ComponentType] = {
     for {
-    maybeFormatExpr <- optMaybeFormatExpr(roundingMode)
-    maybeValueExpr  <- optMaybeValueExpr
-    result <- createTextObject(maybeFormatExpr,maybeValueExpr,multiline,displayWidth,toUpperCase)}
-    yield result
-    }
+      maybeFormatExpr <- optMaybeFormatExpr(roundingMode)
+      maybeValueExpr  <- optMaybeValueExpr
+      result          <- createObject(maybeFormatExpr, maybeValueExpr, multiline, displayWidth, toUpperCase)
+    } yield result
+  }
 
   private lazy val textOpt: Opt[ComponentType] = {
     for {
@@ -200,8 +200,6 @@ class FormComponentMaker(json: JsValue) { //variablesBuilder
       // format: on
     } yield result
   }
-
-
 
   private final object HasDisplayWidth {
     def unapply(displayWidth: Option[String]): Option[DisplayWidth] =
@@ -435,7 +433,7 @@ class FormComponentMaker(json: JsValue) { //variablesBuilder
       }
   }
 
-   final object HasTextExpression {
+  final object HasTextExpression {
     def unapply(valueExp: Option[ValueExpr]): Option[Expr] =
       valueExp match {
         case Some(TextExpression(expr)) => Some(expr)
@@ -444,7 +442,7 @@ class FormComponentMaker(json: JsValue) { //variablesBuilder
       }
   }
 
-   final object IsMultiline {
+  final object IsMultiline {
     def unapply(multiline: Option[String]): Boolean =
       multiline match {
         case Some(IsTrueish()) => true
@@ -452,7 +450,7 @@ class FormComponentMaker(json: JsValue) { //variablesBuilder
       }
   }
 
-   final object IsNotMultiline {
+  final object IsNotMultiline {
     def unapply(multiline: Option[String]): Boolean = !IsMultiline.unapply(multiline)
   }
 
@@ -539,9 +537,4 @@ class FormComponentMaker(json: JsValue) { //variablesBuilder
 
     } yield res
   }
-}
-
-object FormComponentMaker {
-  import uk.gov.hmrc.gform.formtemplate.
-
 }
