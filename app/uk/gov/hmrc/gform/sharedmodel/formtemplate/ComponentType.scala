@@ -75,10 +75,6 @@ object DisplayWidth extends Enumeration {
   implicit val displayWidthReads = Reads.enumNameReads(DisplayWidth)
   implicit val displayWidthWrites = Writes.enumNameWrites
 }
-sealed trait UpperCaseBoolean
-
-case object IsUpperCase extends UpperCaseBoolean
-case object IsNotUpperCase extends UpperCaseBoolean
 
 object UpperCaseBoolean {
   def test(bool: Boolean): UpperCaseBoolean = bool match {

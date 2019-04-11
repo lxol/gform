@@ -151,7 +151,7 @@ class FormComponentMaker(json: JsValue) { //variablesBuilder
     for {
       maybeFormatExpr <- optMaybeFormatExpr(roundingMode)
       maybeValueExpr  <- optMaybeValueExpr
-      result          <- createObject(maybeFormatExpr, maybeValueExpr, multiline, displayWidth, toUpperCase)
+      result          <- createObject(maybeFormatExpr, maybeValueExpr, multiline, displayWidth, toUpperCase, json)
     } yield result
   }
 
@@ -211,14 +211,6 @@ class FormComponentMaker(json: JsValue) { //variablesBuilder
         case Some("xl")  => Some(DisplayWidth.XL)
         case Some("xxl") => Some(DisplayWidth.XXL)
         case _           => Some(DisplayWidth.DEFAULT)
-      }
-  }
-  final object ToUpperCase {
-    def unapply(isUpperCase: Option[String]): Option[Boolean] =
-      isUpperCase match {
-        case Some("true")  => Some(true)
-        case Some("false") => Some(false)
-        case _             => Some(false)
       }
   }
 
