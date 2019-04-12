@@ -37,6 +37,11 @@ case class Text(
   toUpperCase: Boolean = false)
     extends ComponentType
 
+sealed trait UpperCaseBoolean
+
+case object IsUpperCase extends UpperCaseBoolean
+case object IsNotUpperCase extends UpperCaseBoolean
+
 case class TextArea(constraint: TextConstraint, value: Expr, displayWidth: DisplayWidth = DisplayWidth.DEFAULT)
     extends ComponentType
 

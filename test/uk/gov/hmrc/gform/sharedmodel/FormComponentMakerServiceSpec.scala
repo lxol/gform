@@ -31,29 +31,29 @@ class FormComponentMakerServiceSpec extends Spec {
   private val xsDisplayWidth = XS
   private val defaultDisplayWidth = DEFAULT
 
-  "createTextObject" should "return a text object" in {
+  "createTextObject" should "return a valid text object" in {
 
     val table = Table(
       ("actual", "expected"),
       (
         createTextObject(Some(TextFormat(textConstraint)), Some(TextExpression(expr)), None, None),
         Text(textConstraint, expr).asRight),
-      (createTextObject(None, Some(TextExpression(expr)), None, None), Text(shortTextConstraint, expr).asRight),
-      (
-        createTextObject(Some(TextFormat(textConstraint)), Some(TextExpression(expr)), Some("xs"), None),
-        Text(textConstraint, expr, xsDisplayWidth).asRight),
-      (
-        createTextObject(None, Some(TextExpression(expr)), Some("xs"), None),
-        Text(shortTextConstraint, expr, xsDisplayWidth).asRight),
       (
         createTextObject(Some(TextFormat(textConstraint)), Some(TextExpression(expr)), None, Some("true")),
         (Text(textConstraint, expr, defaultDisplayWidth, true).asRight)),
+      (createTextObject(None, Some(TextExpression(expr)), None, None), Text(shortTextConstraint, expr).asRight),
       (
         createTextObject(None, Some(TextExpression(expr)), None, Some("true")),
         Text(shortTextConstraint, expr, defaultDisplayWidth, true).asRight),
       (
+        createTextObject(Some(TextFormat(textConstraint)), Some(TextExpression(expr)), Some("xs"), None),
+        Text(textConstraint, expr, xsDisplayWidth).asRight),
+      (
         createTextObject(Some(TextFormat(textConstraint)), Some(TextExpression(expr)), Some("xs"), Some("true")),
         Text(textConstraint, expr, xsDisplayWidth, true).asRight),
+      (
+        createTextObject(None, Some(TextExpression(expr)), Some("xs"), None),
+        Text(shortTextConstraint, expr, xsDisplayWidth).asRight),
       (
         createTextObject(None, Some(TextExpression(expr)), Some("xs"), Some("true")),
         Text(shortTextConstraint, expr, xsDisplayWidth, true).asRight)
@@ -61,5 +61,4 @@ class FormComponentMakerServiceSpec extends Spec {
     table.forEvery({ case (expected, result) => expected shouldBe result })
   }
 
-  it should "work" in {}
 }

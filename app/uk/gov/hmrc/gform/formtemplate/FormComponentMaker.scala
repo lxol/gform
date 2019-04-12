@@ -29,7 +29,7 @@ import uk.gov.hmrc.gform.exceptions.UnexpectedState
 import uk.gov.hmrc.gform.sharedmodel.formtemplate.DisplayWidth.DisplayWidth
 import uk.gov.hmrc.gform.sharedmodel.formtemplate.RoundingMode._
 import uk.gov.hmrc.gform.sharedmodel.formtemplate._
-import uk.gov.hmrc.gform.formtemplate.FormComponentMakerService._
+import uk.gov.hmrc.gform.formtemplate.FormComponentMakerService.{ HasDisplayWidth, IsTrueish, _ }
 case class MES(
   mandatory: Boolean,
   editable: Boolean,
@@ -137,7 +137,7 @@ class FormComponentMaker(json: JsValue) { //variablesBuilder
   }
 
   private lazy val componentTypeOpt: Opt[ComponentType] = `type` match {
-    case Some(TextRaw) | None   => textOpt
+    case Some(TextRaw) | None   => textOpt3
     case Some(DateRaw)          => dateOpt
     case Some(AddressRaw)       => addressOpt
     case Some(GroupRaw)         => groupOpt
@@ -151,7 +151,7 @@ class FormComponentMaker(json: JsValue) { //variablesBuilder
     for {
       maybeFormatExpr <- optMaybeFormatExpr(roundingMode)
       maybeValueExpr  <- optMaybeValueExpr
-      result          <- createObject(maybeFormatExpr, maybeValueExpr, multiline, displayWidth, toUpperCase, json)
+      result          <- createObject(maybeFormatExpr, maybeValueExpr, multiline, displayWidth, toUpperCase, Option(json))
     } yield result
   }
 
@@ -201,6 +201,67 @@ class FormComponentMaker(json: JsValue) { //variablesBuilder
     } yield result
   }
 
+  private lazy val textOpt3: Opt[ComponentType] = {
+    for {
+      maybeFormatExpr <- optMaybeFormatExpr(roundingMode)
+      maybeValueExpr  <- optMaybeValueExpr
+      result <- (maybeFormatExpr, maybeValueExpr, multiline, displayWidth, toUpperCase) match {
+                 // format: off
+
+        case (Some(TextFormat(UkSortCodeFormat)), HasTextExpression(expr), IsNotMultiline(), _,_)                       => UkSortCode(expr).asRight
+        case (Some(TextFormat(f)), HasTextExpression(expr),IsNotMultiline(), None, ToUpperCase(a)) =>
+          Text(f, expr, DisplayWidth.DEFAULT, a).asRight
+        case (None, HasTextExpression(expr), IsNotMultiline(), None, ToUpperCase(a)) =>
+          Text(ShortText, expr, DisplayWidth.DEFAULT, a).asRight
+        case (Some(TextFormat(f)), HasTextExpression(expr),IsNotMultiline(), HasDisplayWidth(dw), ToUpperCase(a)) =>
+          Text(f, expr, dw, a).asRight
+        case (None, HasTextExpression(expr),IsNotMultiline(), HasDisplayWidth(dw), ToUpperCase(a)) =>
+          Text(ShortText, expr, dw, a).asRight
+        case (Some(TextFormat(f)),                HasTextExpression(expr), IsMultiline()   , None,_)                    => TextArea(f, expr).asRight
+        case (None,                               HasTextExpression(expr), IsMultiline()   , None,_)                    => TextArea(BasicText, expr).asRight
+        case (Some(TextFormat(f)),                HasTextExpression(expr), IsMultiline()   , HasDisplayWidth(dw),_)     => TextArea(f, expr,dw).asRight
+        case (None,                               HasTextExpression(expr), IsMultiline()   , HasDisplayWidth(dw),_)     => TextArea(BasicText, expr,dw).asRight
+        case (None,                               HasTextExpression(expr), IsMultiline()   , HasDisplayWidth(dw),_)     => TextArea(BasicText, expr,dw).asRight
+
+        case (_,                 _,       IsMultiline() , _,None) =>
+          UnexpectedState(s"""|toUpperCase is not supported for multiline text field
+                  |Id: $id
+                  |""".stripMargin).asLeft
+        case (maybeInvalidFormat,                 maybeInvalidValue,       IsMultiline()   , _,_) => 
+          UnexpectedState(s"""|Unsupported type of format or value for multiline text field
+                  |Id: $id
+                  |Format: $maybeInvalidFormat
+                  |Value: $maybeInvalidValue
+                  |""".stripMargin).asLeft
+          UnexpectedState(s"""|Unsupported type of format or value for multiline text field
+                  |Id: $id
+                  |Format: $maybeInvalidFormat
+                  |Value: $maybeInvalidValue
+                  |""".stripMargin).asLeft
+        case (Some(invalidFormat),                None,                    IsNotMultiline(), _,_) =>
+          UnexpectedState(s"""|Unsupported type of format and value for text field
+                  |Id: $id
+                  |Format: $invalidFormat
+                  |Value: must supply a value
+                  |""".stripMargin).asLeft
+        case (None,                               Some(invalidValue),      IsNotMultiline(), _,_) =>
+          UnexpectedState(s"""|Unsupported type of format and value for text field
+                  |Id: $id
+                  |Format: "must supply a value for format"
+                  |Value: $invalidValue
+                  |""".stripMargin).asLeft
+        case (Some(invalidFormat),                Some(invalidValue),      IsNotMultiline(), _,_) =>
+          UnexpectedState(s"""|Unsupported type of format and value for text field
+                  |Id: $id
+                  |Format: $invalidFormat
+                  |Value: $invalidValue
+                  |""".stripMargin).asLeft
+      }
+
+      // format: on
+    } yield result
+  }
+
   private final object HasDisplayWidth {
     def unapply(displayWidth: Option[String]): Option[DisplayWidth] =
       displayWidth match {
@@ -223,6 +284,13 @@ class FormComponentMaker(json: JsValue) { //variablesBuilder
                           |Total: $invalidInternational""".stripMargin).asLeft
   }
 
+  final object IsMultiline {
+    def unapply(multiline: Option[String]): Boolean =
+      multiline match {
+        case Some(IsTrueish()) => true
+        case _                 => false
+      }
+  }
   private lazy val dateOpt: Opt[Date] = {
 
     lazy val dateConstraintOpt: Opt[DateConstraintType] =
@@ -423,27 +491,6 @@ class FormComponentMaker(json: JsValue) { //variablesBuilder
         case Some(IsTrueish())         => Some(MultivalueYes)
         case _                         => None
       }
-  }
-
-  final object HasTextExpression {
-    def unapply(valueExp: Option[ValueExpr]): Option[Expr] =
-      valueExp match {
-        case Some(TextExpression(expr)) => Some(expr)
-        case None                       => Some(Value)
-        case _                          => None
-      }
-  }
-
-  final object IsMultiline {
-    def unapply(multiline: Option[String]): Boolean =
-      multiline match {
-        case Some(IsTrueish()) => true
-        case _                 => false
-      }
-  }
-
-  final object IsNotMultiline {
-    def unapply(multiline: Option[String]): Boolean = !IsMultiline.unapply(multiline)
   }
 
   private sealed trait International
