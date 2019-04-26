@@ -45,8 +45,7 @@ object Dependencies {
     "org.jsoup" % "jsoup" % "1.11.3" % scope,
     "com.itv" %% "scalapact-circe-0-9"     % "2.2.5" % scope,
     "com.itv" %% "scalapact-http4s-0-18-0" % "2.2.5" % scope,
-    "com.itv" %% "scalapact-scalatest"     % "2.2.5" % scope
+    "com.itv" %% "scalapact-scalatest"     % "2.2.5" % scope,
+    "com.softwaremill.sttp" %% "core" % "1.5.12" % scope
   )
-
-
 }
