@@ -17,22 +17,25 @@
 package uk.gov.hmrc.gform.cygnum.http
 
 import cats.Monad
-import com.softwaremill.sttp.quick.{ emptyRequest, _ }
-import com.softwaremill.sttp.{ Id, RequestT, Response, StatusCode }
+import com.softwaremill.sttp.quick.{emptyRequest, _}
+import com.softwaremill.sttp.{Id, RequestT, Response}
 import uk.gov.hmrc.gform.config.CygnumConfig
+import uk.gov.hmrc.http.HttpResponse
 
 class CygnumClient[F[_]] extends CygnumConfig {
 
-  def sendRequest(payload: String)(implicit M: Monad[F]): F[CygnumResponse] = {
-    val urnReq: RequestT[Id, String, Nothing] = emptyRequest
+  def sendRequest(payload: String)(implicit M: Monad[F]): F[HttpResponse] = {
+    val soapRequest: RequestT[Id, String, Nothing] = emptyRequest
       .post(uri"$cygnumURL")
       .body(payload)
       .header("Content-Type", "application/soap+xml; charset=utf-8", true)
 
-    val response: Id[Response[String]] = urnReq.send()
+    val response: Id[Response[String]] = soapRequest.send()
 
-    M.pure(CygnumResponse(response.code, response.body))
+    M.pure(
+    response.body match {
+      case Right(body) => HttpResponse(response.code, responseString = Some(body))
+      case Left(_) => HttpResponse(response.code, None)
+    })
   }
 }
-
-case class CygnumResponse(status: StatusCode, body: Either[String, String])

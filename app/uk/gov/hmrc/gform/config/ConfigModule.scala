@@ -132,7 +132,7 @@ class ConfigModule(playComponents: PlayComponents) {
     private def payloadType(destinationServiceKey: String): PayloadType =
       getString(destinationServiceKey, "payloadContentType").getOrElse("json") match {
         case "json"     => PayloadType.JSON
-        case "soap-xml" => PayloadType.SoapXml
+        case "soap-xml" => PayloadType.CYGNUM
         case v          => throw new Exception(s"Invalid payloadContentType in $destinationServiceKey: $v")
       }
 

@@ -40,8 +40,8 @@ class HandlebarsHttpApiModule(wSHttpModule: WSHttpModule, configModule: ConfigMo
           }
 
         profileConfiguration.payloadContentType match {
-          case PayloadType.JSON    => client.json
-          case PayloadType.SoapXml => client.soapXml
+          case PayloadType.JSON   => client.json
+          case PayloadType.CYGNUM => client.cygnum
         }
       }
 

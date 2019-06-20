@@ -19,34 +19,32 @@ package uk.gov.hmrc.gform.cygnum
 import cats.Monad
 import cats.implicits._
 import com.softwaremill.sttp.Id
-import uk.gov.hmrc.gform.cygnum.http.{ CygnumClient, CygnumResponse }
+import uk.gov.hmrc.gform.cygnum.http.CygnumClient
 import uk.gov.hmrc.gform.cygnum.soap.ProxyCode._
+import uk.gov.hmrc.http.HttpResponse
 
 import scala.io.Source
 import scala.xml.XML
 
 class SoapClient[F[_]](client: CygnumClient[F]) {
 
-  def retrieveUrn(implicit M: Monad[F]): F[CygnumResponse] = {
-    val urnResponse: F[CygnumResponse] =
+  def retrieveUrn(implicit M: Monad[F]): F[HttpResponse] = {
+    val urnResponse: F[HttpResponse] =
       client.sendRequest(buildPayload(XML.loadString(GetUrnTemplate.urnTemplate), GetData).getOrElse(""))
 
-    urnResponse.map(
-      response =>
-        response.body.fold(
-          e => e,
-          r => println(s"URN: ${new CygnumDataExtractor(new CygnumDataExtractorProgram[Id]).extractUrn(r)}")))
+    urnResponse.map(r =>
+      println(s"URN: ${new CygnumDataExtractor(new CygnumDataExtractorProgram[Id]).extractUrn(r.body)}"))
 
     urnResponse
   }
 
-  def submitForm(implicit M: Monad[F]): F[CygnumResponse] = {
+  def submitForm(implicit M: Monad[F]): F[HttpResponse] = {
 
     //TODO hard coded data
     val xml: String =
       Source.fromFile("./ofsted_example_templates/submitFormTemplate.xml").getLines.mkString
 
-    val formResponse: F[CygnumResponse] =
+    val formResponse: F[HttpResponse] =
       client.sendRequest(buildPayload(XML.loadString(xml), SendData).getOrElse(""))
 
     formResponse.map(response => println(s"Status: ${response.status}\nBody: ${response.body}"))
