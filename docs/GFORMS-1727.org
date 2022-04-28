@@ -1,0 +1,119 @@
+
+#+begin_src verb :wrap src ob-verb-response :file
+    post https://www.qa.tax.service.gov.uk/submissions/test-only/proxy-to-gform/gform/formtemplates
+    Content-Type: application/json; charset=utf-8
+    Csrf-Token: nocheck
+
+
+  {
+    "_id": "alex-atl",
+    "formName": "Empty shortName",
+    "sections": [
+      {
+        "type": "addToList",
+        "title": "Add To List",
+        "shortName": "Add To List",
+        "summaryDescription": "summary: ${fieldA} ${fieldB}",
+        "description": "description: ${fieldA} ${fieldB}",
+        "summaryName": "Add To List",
+        "addAnotherQuestion": {
+          "id": "addToListA",
+          "type": "choice",
+          "label": "Add another?",
+          "format": "yesno"
+        },
+        "pages": [
+          {
+            "title": "Page $n",
+            "shortName": "asdfa ",
+            "fields": [
+              {
+                "id": "fieldA",
+                "type": "text",
+                "label": "Field A $n",
+                "format": "sterling"
+              },
+              {
+                "id": "fieldB",
+                "type": "text",
+                "label": "Field B",
+                "format": "sterling"
+              }
+            ]
+          },
+          {
+            "title": "Page $n",
+            "shortName": "asdfa1 ",
+            "fields": [
+              {
+                "id": "fieldA1",
+                "type": "text",
+                "includeIf": "${n}",
+                "label": "Field A1",
+                "format": "steling"
+              },
+              {
+                "id": "fieldB1",
+                "type": "text",
+                "label": "Field B1",
+                "format": "sterling"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "emailTemplateId": "confirmation",
+    "authConfig": {
+      "authModule": "anonymous"
+    },
+    "declarationSection": {
+      "title": "Declaration",
+      "fields": []
+    },
+    "acknowledgementSection": {
+      "title": "Confirmation page",
+      "fields": []
+    },
+    "destinations": [
+      {
+        "id": "transitionToSubmitted",
+        "type": "stateTransition",
+        "requiredState": "Submitted"
+      }
+    ]
+  }
+
+#+end_src
+
+#+RESULTS:
+#+begin_src ob-verb-response
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Content-Length: 281
+Connection: keep-alive
+Server: CloudFront
+Date: Thu, 31 Mar 2022 08:27:24 GMT
+vary: Origin
+set-cookie: mdtpdi=mdtpdi#17c98125-b6b3-426b-a491-51d15ec277af#1648552918007_8wTJLowmLGK10cKLLf6jUg==; Max-Age=315360000; Expires=Sun, 28 Mar 2032 08:27:24 GMT; Path=/; Secure; HTTPOnly
+set-cookie: mdtp=2F8ZPOYVfqC9e02xy6A2ihsayd88pQAm4G6Uy21x3obcEDBadBfEPU4oKvcjbp65BZxY5u/6yqHuyusdP+YpSH3qk1vmVjSIT2mHLuBBro98llfAMYkFMPU=; SameSite=Lax; Path=/; Secure; HTTPOnly
+cache-control: no-cache,no-store,max-age=0
+referrer-policy: origin-when-cross-origin, strict-origin-when-cross-origin
+x-frame-options: SAMEORIGIN
+x-xss-protection: 1; mode=block
+x-content-type-options: nosniff
+content-security-policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://tagmanager.google.com https://www.googletagmanager.com https://www.google-analytics.com https://ssl.google-analytics.com https://*.optimizely.com https://optimizely.s3.amazonaws.com https://cdn-assets-prod.s3.amazonaws.com ; style-src 'self' 'unsafe-inline' https://tagmanager.google.com https://fonts.googleapis.com; img-src 'self' data: https://ssl.gstatic.com https://www.gstatic.com https://www.google-analytics.com https://cdn.optimizely.com; font-src 'self' data: https://ssl.gstatic.com https://fonts.gstatic.com https://fonts.googleapis.com; frame-src 'self' https://www.googletagmanager.com https://*.cdn.optimizely.com; connect-src 'self' https://www.google-analytics.com https://*.upscan.tax.service.gov.uk https://logx.optimizely.com https://*.optimizely.com; object-src 'none'
+x-envoy-upstream-service-time: 31
+x-permitted-cross-domain-policies: master-only
+Strict-Transport-Security: max-age=31536000;
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Cache: Error from cloudfront
+Via: 1.1 f0f31e95ac261ee02dea9c554605a186.cloudfront.net (CloudFront)
+X-Amz-Cf-Pop: LHR61-P4
+X-Amz-Cf-Id: -4mvXFml-CblXqKb2MadVjNXCf7XP-nczlBtQ-Vx3Vxe74a2AIncUA==
+
+{
+  "error": "List((/sections(0)/pages(1)/fields(0),List(JsonValidationError(List(UnexpectedState(Missing or invalid format for text field\nId: fieldA1\nFormat: Some(OrientationFormat(steling))\nValue: None\n)),WrappedArray()))))",
+  "occurrenceId": "182a5dea-a46e-44b1-9754-01ec287fe288"
+}
+#+end_src

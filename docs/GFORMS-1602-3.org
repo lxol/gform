@@ -1,0 +1,804 @@
+* form request-pension-scheme-tax-refund
+       post http://localhost:9196/gform/formtemplates
+       post https://www.qa.tax.service.gov.uk/submissions/test-only/proxy-to-gform/gform/formtemplates
+#+begin_src verb :wrap src ob-verb-response
+       post http://localhost:9196/gform/formtemplates
+       Content-Type: application/json; charset=utf-8
+       Csrf-Token: nocheck
+
+{
+  "_id": "tell-hmrc-you-are-registered-for-vat-import-one-stop-shop-in-eu",
+  "formName": {
+    "en": "Tell HMRC you are registered for the VAT Import One Stop Shop in the EU",
+    "cy": "Rhowch wybod i CThEM eich bod wedi’ch cofrestru ar gyfer y Gwasanaeth Un Cam ar gyfer TAW o ran Mewnforio yn yr UE"
+  },
+  "description": {
+    "en": "Use this service to tell HMRC about VAT IOSS registration numbers if you have registered for the VAT Import One Stop Shop (IOSS) in the EU.",
+    "cy": "Defnyddiwch y gwasanaeth hwn i roi gwybod i CThEM am rifau cofrestru GUC Mewnforio TAW os ydych wedi cofrestru ar gyfer y Gwasanaeth Un Cam ar gyfer TAW o ran Mewnforio (GUC Mewnforio) yn yr UE."
+  },
+  "developmentPhase": "beta",
+  "displayHMRCLogo": false,
+  "userResearchUrl": "https://signup.take-part-in-research.service.gov.uk/?utm_campaign=Tell_HMRC_you_are_registered_for_the_VAT_Import_One_Stop_Shop_in_the_EU&utm_source=Other&utm_medium=other&t=HMRC&id=392",
+  "emailTemplateId": {
+    "en": "ioss_confirmation",
+    "cy": "ioss_confirmation_cy"
+  },
+  "emailParameters": [
+    {
+      "value": "${fullName}",
+      "emailTemplateVariable": "customerName"
+    },
+    {
+      "value": "${form.submissionReference}",
+      "emailTemplateVariable": "submissionReference"
+    },
+    {
+      "value": "${businessNameHidden}",
+      "emailTemplateVariable": "businessName"
+    }
+  ],
+  "expressions": {
+    "emailChoice": "if isIntermediary contains 1 then companyName else if isIntermediary contains 0 && client.count > 1 then ('businesses in EU countries', 'busnesau yng ngwledydd yr UE') else if isIntermediary contains 0 && client.count = 1 then clientName else ''"
+  },
+  "languages": [
+    "en",
+    "cy"
+  ],
+  "authConfig": {
+    "authModule": "email",
+    "emailCodeTemplate": {
+      "en": "ioss_code",
+      "cy": "ioss_code_cy"
+    }
+  },
+  "sections": [
+    {
+      "title": {
+        "en": "Are you an intermediary acting on behalf of a client's business?",
+        "cy": "A ydych yn gyfryngwr sy’n gweithredu ar ran busnes cleient?"
+      },
+      "shortName": {
+        "en": "Intermediary details",
+        "cy": "Manylion y cyfryngwr"
+      },
+      "fields": [
+        {
+          "id": "isIntermediary",
+          "type": "choice",
+          "shortName": {
+            "en": "Are you an intermediary acting for a client's business",
+            "cy": "A ydych yn gyfryngwr sy’n gweithredu ar ran busnes eich cleient"
+          },
+          "label": {
+            "en": "Are you an intermediary acting on behalf of a client's business?",
+            "cy": "A ydych yn gyfryngwr sy’n gweithredu ar ran busnes cleient?"
+          },
+          "errorMessage": {
+            "en": "Select whether you are the intermediary, or the registered business",
+            "cy": "Dewiswch ai chi yw’r cyfryngwr neu’r busnes cofrestredig"
+          },
+          "choices": [
+            {
+              "en": "Yes",
+              "cy": "Iawn"
+            },
+            {
+              "en": "No",
+              "cy": "Na"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": {
+        "en": "What is the name of your business?",
+        "cy": "Beth yw enw’ch busnes?"
+      },
+      "presentationHint": "invisiblePageTitle",
+      "includeIf": "${isIntermediary = 0}",
+      "fields": [
+        {
+          "type": "text",
+          "id": "businessNameAsIntermediary",
+          "label": {
+            "en": "What is the name of your business?",
+            "cy": "Beth yw enw’ch busnes?"
+          },
+          "helpText": {
+            "en": "This is the name of your business as registered with the Import One Stop Shop (IOSS) in an EU country.",
+            "cy": "Dyma enw’r busnes fel y’i cofrestrwyd gyda’r Gwasanaeth Un Cam o ran Mewnforio (GUC Mewnforio) mewn gwlad yn yr UE."
+          },
+          "shortName": {
+            "en": "Intermediary name",
+            "cy": "Enw’r cyfryngwr"
+          },
+          "format": "text"
+        }
+      ]
+    },
+    {
+      "title": {
+        "en": "What is the IOSS registration number for ${businessNameAsIntermediary}?",
+        "cy": "Beth yw’r rhif cofrestru GUC Mewnforio ar gyfer ${businessNameAsIntermediary}?"
+      },
+      "noPIITitle": {
+        "en": "What is the IOSS registration number for the business?",
+        "cy": "Beth yw rhif cofrestru GUC Mewnforio’r busnes?"
+      },
+      "presentationHint": "invisiblePageTitle",
+      "includeIf": "${isIntermediary = 0}",
+      "fields": [
+        {
+          "type": "text",
+          "id": "yourIOSSasIntermediary",
+          "label": {
+            "en": "What is the IOSS registration number for ${businessNameAsIntermediary}?",
+            "cy": "Beth yw’r rhif cofrestru GUC Mewnforio ar gyfer ${businessNameAsIntermediary}?"
+          },
+          "helpText": {
+            "en": "This is the registration number with the EU country. It is 'IN' followed by 10 numbers, for example IN1234567890.",
+            "cy": "Dyma’r rhif cofrestru sydd gyda’r wlad yn yr UE. ‘IN’ yw hwn wedi’i ddilyn gan 10 rhif, er enghraifft IN1234567890."
+          },
+          "shortName": {
+            "en": "Intermediary IOSS registration number",
+            "cy": "Rhif cofrestru GUC Mewnforio’r cyfryngwr"
+          },
+          "format": "text",
+          "displayWidth": "m",
+          "toUpperCase": "true",
+          "validators": [
+            {
+              "validIf": "${yourIOSSasIntermediary match '^[^a-zA-Z0-9]*[iI][nN][^a-zA-Z0-9]*[0-9]{10}[^a-zA-Z0-9]*$'}",
+              "errorMessage": {
+                "en": "IOSS registration number must be 'IN' followed by 10 numbers",
+                "cy": "Mae’n rhaid i’r rhif cofrestru GUC Mewnforio ddechrau gydag ‘IN’, a hynny wedi’i ddilyn gan 10 rhif"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "listOfClients",
+      "type": "addToList",
+      "includeIf": "${isIntermediary = 0}",
+      "title": {
+        "en": "Clients you have added",
+        "cy": "Cleientiaid rydych wedi’u hychwanegu"
+      },
+      "summaryName": {
+        "en": "Clients",
+        "cy": "Cleientiaid"
+      },
+      "shortName": {
+        "en": "Client $n",
+        "cy": "Cleient $n"
+      },
+      "description": {
+        "en": "**$n.** ${clientName}",
+        "cy": "**$n.** ${clientName}"
+      },
+      "summaryDescription": {
+        "en": "${clientName}",
+        "cy": "${clientName}"
+      },
+      "addAnotherQuestion": {
+        "id": "client",
+        "type": "choice",
+        "label": {
+          "en": "Do you want to add another client?",
+          "cy": "A ydych eisiau ychwanegu cleient arall?"
+        },
+        "choices": [
+          {
+            "en": "Yes",
+            "cy": "Iawn"
+          },
+          {
+            "en": "No",
+            "cy": "Na"
+          }
+        ],
+        "errorMessage": {
+          "en": "Select whether you want to add another client",
+          "cy": "Dewiswch a ydych eisiau ychwanegu cleient arall"
+        }
+      },
+      "defaultPage": {
+        "title": {
+          "en": "Add your first client on the next page",
+          "cy": "Ychwanegwch eich cleient cyntaf ar y dudalen nesaf"
+        },
+        "fields": [
+          {
+            "id": "userUploadInfo1",
+            "type": "info",
+            "label": "",
+            "infoText": {
+              "en": "For each client you will need:\n\n * name of business\n\n * IOSS registration number from an EU country\n\n * EU country where the business is registered\n\n * business address\n\n * UK VAT number, if the business has one",
+              "cy": "Ar gyfer pob cleient bydd angen:\n\n * enw’r busnes\n\n * rhif cofrestru GUC Mewnforio o wlad yn yr UE\n\n * y wlad yn yr UE lle mae’r busnes wedi ei gofrestru\n\n * cyfeiriad y busnes\n\n * rhif TAW yn y DU, os oes un gan y busnes"
+            },
+            "infoType": "noformat"
+          }
+        ]
+      },
+      "cyaPage": {
+        "updateTitle": {
+          "en": "Change answers for ${clientName}",
+          "cy": "Newid atebion ar gyfer ${clientName}"
+        },
+        "noPIIUpdateTitle": {
+          "en": "Change your answers",
+          "cy": "Newidiwch eich atebion"
+        }
+      },
+      "pages": [
+        {
+          "title": {
+            "en": "What is the name of this client's business?",
+            "cy": "Beth yw enw busnes y cleient hwn?"
+          },
+          "presentationHint": "invisiblePageTitle",
+          "progressIndicator": {
+            "en": "Client $n",
+            "cy": "Cleient $n"
+          },
+          "fields": [
+            {
+              "type": "text",
+              "id": "clientName",
+              "label": {
+                "en": "What is the name of this client's business?",
+                "cy": "Beth yw enw busnes y cleient hwn?"
+              },
+              "shortName": {
+                "en": "Name of client's business",
+                "cy": "Enw busnes y cleient"
+              },
+              "helpText": {
+                "en": "This is the name as registered with the EU country IOSS.",
+                "cy": "Dyma’r enw fel sydd wedi’i gofrestru â GUC Mewnforio gwlad yn yr UE."
+              },
+              "mandatory": "yes",
+              "format": "text",
+              "displayWidth": "l"
+            }
+          ]
+        },
+        {
+          "title": {
+            "en": "Registration details for ${clientName}",
+            "cy": "Manylion cofrestru ar gyfer ${clientName}"
+          },
+          "noPIITitle": {
+            "en": "Business registration details?",
+            "cy": "Manylion cofrestru’r busnes?"
+          },
+          "progressIndicator": {
+            "en": "Client $n",
+            "cy": "Cleient $n"
+          },
+          "fields": [
+            {
+              "type": "text",
+              "id": "clientIOSS",
+              "label": {
+                "en": "IOSS registration number for ${clientName}",
+                "cy": "Rhif cofrestru GUC Mewnforio ar gyfer ${clientName}"
+              },
+              "helpText": {
+                "en": "This is 'IM' followed by 10 numbers, for example IM1234567890.",
+                "cy": "‘IM’ yw hwn wedi’i ddilyn gan 10 rhif, er enghraifft IM1234567890."
+              },
+              "shortName": {
+                "en": "IOSS registration number",
+                "cy": "Rhif cofrestru GUC Mewnforio"
+              },
+              "format": "text",
+              "toUpperCase": "true",
+              "displayWidth": "m",
+              "validators": [
+                {
+                  "validIf": "${clientIOSS match '^[^a-zA-Z0-9]*[iI][mM][^a-zA-Z0-9]*[0-9]{10}[^a-zA-Z0-9]*$'}",
+                  "errorMessage": {
+                    "en": "The business IOSS registration number must be 'IM' letters followed by 10 numbers",
+                    "cy": "Mae’n rhaid i rif cofrestru GUC Mewnforio’r busnes gynnwys y llythrennau ‘IM’ wedi’u dilyn gan 10 rhif"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "euStateReg",
+              "label": {
+                "en": "EU country of IOSS registration",
+                "cy": "Y wlad yn yr UE lle y cafwyd cofrestriad GUC Mewnforio"
+              },
+              "helpText": {
+                "en": "Start typing, then select a country.",
+                "cy": "Dechreuwch deipio ac yna dewiswch wlad."
+              },
+              "mandatory": "yes",
+              "format": "lookup(country)",
+              "selectionCriteria": [
+                {
+                  "column": "Region",
+                  "value": [
+                    "3"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": {
+            "en": "What is the address of ${clientName}?",
+            "cy": "Beth yw cyfeiriad ${clientName}?"
+          },
+          "progressIndicator": {
+            "en": "Client $n",
+            "cy": "Cleient $n"
+          },
+          "noPIITitle": {
+            "en": "What is the address of the business?",
+            "cy": "Beth yw cyfeiriad y busnes?"
+          },
+          "presentationHint": "invisiblePageTitle",
+          "fields": [
+            {
+              "type": "overseasAddress",
+              "id": "clientAddress",
+              "label": {
+                "en": "What is the address of ${clientName}?",
+                "cy": "Beth yw cyfeiriad ${clientName}?"
+              },
+              "helpText": {
+                "en": "This is the registered address in the country where the business is based.",
+                "cy": "Dyma’r cyfeiriad cofrestredig yn y wlad lle mae’r busnes wedi’i leoli."
+              },
+              "shortName": {
+                "en": "Business address",
+                "cy": "Cyfeiriad y busnes"
+              }
+            }
+          ]
+        },
+        {
+          "title": {
+            "en": "Does ${clientName} have a UK VAT number?",
+            "cy": "A oes gan ${clientName} rif TAW yn y DU?"
+          },
+          "noPIITitle": {
+            "en": "Does your client have a UK VAT number?",
+            "cy": "A oes gan eich cleient rif TAW yn y DU?"
+          },
+          "progressIndicator": {
+            "en": "Client $n",
+            "cy": "Cleient $n"
+          },
+          "presentationHint": "invisiblePageTitle",
+          "fields": [
+            {
+              "id": "vatNoChoice1",
+              "type": "revealingChoice",
+              "errorMessage": {
+                "en": "Select whether ${clientName} has a UK VAT number",
+                "cy": "Dewiswch a oes gan ${clientName} rif cofrestru TAW yn y DU"
+              },
+              "label": {
+                "en": "Does ${clientName} have a UK VAT number?",
+                "cy": "A oes gan ${clientName} rif TAW yn y DU?"
+              },
+              "shortName": {
+                "en": "${clientName} holds UK VAT number",
+                "cy": "Mae gan ${clientName} rif TAW yn y DU"
+              },
+              "choices": [
+                {
+                  "en": "Yes",
+                  "cy": "Iawn"
+                },
+                {
+                  "en": "No",
+                  "cy": "Na"
+                }
+              ],
+              "revealingFields": [
+                [
+                  {
+                    "displayWidth": "l",
+                    "id": "vatNo1",
+                    "type": "text",
+                    "label": {
+                      "en": "VAT registration number",
+                      "cy": "Rhif cofrestru TAW"
+                    },
+                    "format": "text",
+                    "helpText": {
+                      "en": "This is 9 numbers, sometimes with ‘GB’ at the start, for example 123456789 or GB123456789. You can find it on the VAT registration certificate for ${clientName}.",
+                      "cy": "9 rhif yw hwn, weithiau â ‘GB’ ar y dechrau. Er enghraifft 123456789 neu GB123456789. Mae hwn i’w weld ar eich tystysgrif cofrestru TAW ar gyfer ${clientName}."
+                    },
+                    "toUpperCase": "true",
+                    "validators": [
+                      {
+                        "validIf": "${vatNo1 match '^[^a-zA-Z0-9]*[gG][bB][^a-zA-Z0-9]*[0-9]{9}[^a-zA-Z0-9]*$' || vatNo1 match '^[0-9]{9}[^a-zA-Z0-9]*$'}",
+                        "errorMessage": {
+                          "en": "VAT registration number must be 9 numbers, or 'GB' followed by 9 numbers",
+                          "cy": "Mae’n rhaid i’r rhif cofrestru TAW fod yn 9 rhif, neu’n ‘GB’ wedi’i ddilyn gan 9 rhif"
+                        }
+                      }
+                    ]
+                  }
+                ],
+                []
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": {
+        "en": "What is the name of your business?",
+        "cy": "Beth yw enw’ch busnes?"
+      },
+      "shortName": {
+        "en": "Company details",
+        "cy": "Manylion y cwmni"
+      },
+      "includeIf": "${isIntermediary = 1}",
+      "fields": [
+        {
+          "id": "companyName",
+          "type": "text",
+          "helpText": {
+            "en": "This is the name of your business as registered with the Import One Stop Shop (IOSS) in an EU country.",
+            "cy": "Dyma enw’r busnes fel y’i cofrestrwyd gyda’r Gwasanaeth Un Cam o ran Mewnforio (GUC Mewnforio) mewn gwlad yn yr UE."
+          },
+          "shortName": {
+            "en": "Company name",
+            "cy": "Enw’r cwmni"
+          },
+          "label": {
+            "en": "What is the name of your business?",
+            "cy": "Beth yw enw’ch busnes?"
+          },
+          "format": "text"
+        }
+      ]
+    },
+    {
+      "title": {
+        "en": "Registration details for ${companyName}",
+        "cy": "Manylion cofrestru ar gyfer ${companyName}"
+      },
+      "noPIITitle": {
+        "en": "Your business registration details?",
+        "cy": "Manylion cofrestru eich busnes?"
+      },
+      "includeIf": "${isIntermediary = 1}",
+      "fields": [
+        {
+          "type": "text",
+          "id": "companyIOSS",
+          "label": {
+            "en": "IOSS registration number",
+            "cy": "Rhif cofrestru GUC Mewnforio"
+          },
+          "helpText": {
+            "en": "This is 'IM' followed by 10 numbers, for example IM1234567890.",
+            "cy": "‘IM’ yw hwn wedi’i ddilyn gan 10 rhif, er enghraifft IM1234567890."
+          },
+          "shortName": {
+            "en": "IOSS registration number",
+            "cy": "Rhif cofrestru GUC Mewnforio"
+          },
+          "format": "text",
+          "displayWidth": "m",
+          "toUpperCase": "true",
+          "validators": [
+            {
+              "validIf": "${companyIOSS match '^[^a-zA-Z0-9]*[iI][mM][^a-zA-Z0-9]*[0-9]{10}[^a-zA-Z0-9]*$'}",
+              "errorMessage": {
+                "en": "The business IOSS registration number must be 'IM' letters followed by 10 numbers",
+                "cy": "Mae’n rhaid i rif cofrestru GUC Mewnforio’r busnes gynnwys y llythrennau ‘IM’ wedi’u dilyn gan 10 rhif"
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "euStateRegBusiness",
+          "label": {
+            "en": "EU country of IOSS registration",
+            "cy": "Y wlad yn yr UE lle y cafwyd cofrestriad GUC Mewnforio"
+          },
+          "helpText": {
+            "en": "Start typing, then select a country.",
+            "cy": "Dechreuwch deipio ac yna dewiswch wlad."
+          },
+          "mandatory": "yes",
+          "format": "lookup(country)",
+          "selectionCriteria": [
+            {
+              "column": "Region",
+              "value": [
+                "3"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": {
+        "en": "Does ${companyName} have a UK VAT number?",
+        "cy": "A oes gan ${companyName} rif TAW yn y DU?"
+      },
+      "noPIITitle": {
+        "en": "Does your business have a UK VAT number?",
+        "cy": "A oes gan eich busnes rif TAW yn y DU?"
+      },
+      "includeIf": "${isIntermediary = 1}",
+      "presentationHint": "invisiblePageTitle",
+      "fields": [
+        {
+          "id": "vatNoChoice",
+          "type": "revealingChoice",
+          "errorMessage": {
+            "en": "Select whether ${companyName} has a UK VAT number",
+            "cy": "Dewiswch a oes gan ${companyName} rif TAW"
+          },
+          "label": "Does ${companyName} have a UK VAT number?",
+          "shortName": "${companyName} holds UK VAT number",
+          "choices": [
+            {
+              "en": "Yes",
+              "cy": "Iawn"
+            },
+            {
+              "en": "No",
+              "cy": "Na"
+            }
+          ],
+          "revealingFields": [
+            [
+              {
+                "displayWidth": "l",
+                "id": "vatNo",
+                "type": "text",
+                "label": {
+                  "en": "VAT registration number",
+                  "cy": "Rhif cofrestru TAW"
+                },
+                "format": "text",
+                "helpText": {
+                  "en": "This is 9 numbers, sometimes with ‘GB’ at the start, for example 123456789 or GB123456789. You can find it on the VAT registration certificate for ${companyName}.",
+                  "cy": "9 rhif yw hwn, weithiau â ‘GB’ ar y dechrau. Er enghraifft 123456789 neu GB123456789. Mae hwn i’w weld ar eich tystysgrif cofrestru TAW ar gyfer ${companyName}."
+                },
+                "toUpperCase": "true",
+                "validators": [
+                  {
+                    "validIf": "${vatNo match '^[^a-zA-Z0-9]*[gG][bB][^a-zA-Z0-9]*[0-9]{9}[^a-zA-Z0-9]*$' || vatNo match '^[0-9]{9}[^a-zA-Z0-9]*$'}",
+                    "errorMessage": {
+                      "en": "VAT registration number must be 9 numbers, or 'GB' followed by 9 numbers",
+                      "cy": "Mae’n rhaid i’r rhif cofrestru TAW fod yn 9 rhif, neu’n ‘GB’ wedi’i ddilyn gan 9 rhif"
+                    }
+                  }
+                ]
+              }
+            ],
+            []
+          ]
+        }
+      ]
+    },
+    {
+      "title": {
+        "en": "What is the address of ${companyName}?",
+        "cy": "Beth yw’r cyfeiriad gohebu newydd ar gyfer ${companyName}?"
+      },
+      "noPIITitle": {
+        "en": "What is the address of your business?",
+        "cy": "Beth yw cyfeiriad eich busnes?"
+      },
+      "presentationHint": "invisiblePageTitle",
+      "includeIf": "${isIntermediary = 1}",
+      "fields": [
+        {
+          "type": "overseasAddress",
+          "id": "address",
+          "label": {
+            "en": "What is the address of ${companyName}?",
+            "cy": "Beth yw’r cyfeiriad gohebu newydd ar gyfer ${companyName}?"
+          },
+          "helpText": {
+            "en": "This is the registered address in the country where the business is based.",
+            "cy": "Dyma’r cyfeiriad cofrestredig yn y wlad lle mae’r busnes wedi’i leoli."
+          },
+          "shortName": {
+            "en": "Address",
+            "cy": "Cyfeiriad"
+          }
+        }
+      ]
+    },
+    {
+      "title": {
+        "en": "What is your full name?",
+        "cy": "Beth yw’ch enw llawn?"
+      },
+      "shortName": {
+        "en": "Contact details",
+        "cy": "Manylion cyswllt"
+      },
+      "fields": [
+        {
+          "type": "text",
+          "id": "fullName",
+          "label": {
+            "en": "What is your full name?",
+            "cy": "Beth yw’ch enw llawn?"
+          },
+          "helpText": {
+            "en": "We will only use this if we contact you about this notification.",
+            "cy": "Byddwn ond yn defnyddio’ch enw os byddwn yn cysylltu â chi ynglŷn â’r hysbysiad hwn."
+          },
+          "shortName": {
+            "en": "Your full name",
+            "cy": "Eich enw llawn"
+          },
+          "format": "text"
+        }
+      ]
+    },
+    {
+      "title": {
+        "en": "Which contact email address should we use?",
+        "cy": "Pa gyfeiriad e-bost cyswllt y dylem ei ddefnyddio?"
+      },
+      "presentationHint": "invisiblePageTitle",
+      "fields": [
+        {
+          "id": "individualEmail",
+          "type": "revealingChoice",
+          "helpText": {
+            "en": "We will only use this to send a confirmation that you notified HMRC about your IOSS registration, or if we need to contact you about this notification.",
+            "cy": "Byddwn ond yn defnyddio hwn i anfon cadarnhad eich bod wedi rhoi gwybod i CThEM am eich cofrestriad GUC Mewnforio, neu os bydd angen cysylltu â chi ynglŷn â’r hysbysiad hwn."
+          },
+          "label": {
+            "en": "Which contact email address should we use?",
+            "cy": "Pa gyfeiriad e-bost cyswllt y dylem ei ddefnyddio?"
+          },
+          "presentationHint": "invisibleInSummary",
+          "submitMode": "notsubmitted",
+          "validators": [
+            {
+              "validIf": "${individualEmail contains 0 || individualEmail contains 1}",
+              "errorMessage": {
+                "en": "Select which contact email address we should use",
+                "cy": "Dewiswch pa gyfeiriad e-bost cyswllt y dylem ei ddefnyddio"
+              }
+            }
+          ],
+          "shortName": {
+            "en": "Which email address",
+            "cy": "Pa gyfeiriad e-bost"
+          },
+          "choices": [
+            {
+              "en": "${auth.email}",
+              "cy": "${auth.email}"
+            },
+            {
+              "en": "a different email address",
+              "cy": "cyfeiriad e-bost gwahanol"
+            }
+          ],
+          "revealingFields": [
+            [],
+            [
+              {
+                "id": "newEmail",
+                "type": "text",
+                "label": {
+                  "en": "Contact email address",
+                  "cy": "Cyfeiriad e-bost cyswllt"
+                },
+                "format": "email"
+              }
+            ]
+          ]
+        },
+        {
+          "id": "email",
+          "type": "text",
+          "label": {
+            "en": "Contact email address",
+            "cy": "Cyfeiriad e-bost cyswllt"
+          },
+          "submitMode": "derived",
+          "value": "${(newEmail orElse auth.email)}",
+          "format": "text"
+        },
+        {
+          "id": "businessNameHidden",
+          "type": "text",
+          "label": {
+            "en": "Business name",
+            "cy": "Enw’r busnes"
+          },
+          "value": "${emailChoice}",
+          "submitMode": "derived",
+          "mandatory": "false",
+          "presentationHint": "invisibleInSummary",
+          "format": "text"
+        }
+      ]
+    }
+  ],
+  "summarySection": {
+    "title": {
+      "en": "Check your answers",
+      "cy": "Gwiriwch eich atebion"
+    },
+    "header": {
+      "en": "",
+      "cy": ""
+    },
+    "footer": {
+      "en": "<h2 class='govuk-heading-m'>Declaration</h2>\n\nBy submitting this application you confirm that to the best of your knowledge the details you are providing are correct.",
+      "cy": "<h2 class='govuk-heading-m'>Datganiad</h2>\n\nDrwy gyflwyno’r cais hwn, rydych yn cadarnhau, hyd eithaf eich gwybodaeth, fod y manylion a roddir gennych yn gywir."
+    },
+    "continueLabel": {
+      "en": "Accept and submit",
+      "cy": "Derbyn a chyflwyno"
+    }
+  },
+  "acknowledgementSection": {
+    "title": {
+      "en": "Acknowledgement Page",
+      "cy": "Tudalen Gydnabyddiaeth"
+    },
+    "shortName": {
+      "en": "Acknowledgement Page",
+      "cy": "Tudalen Gydnabyddiaeth"
+    },
+    "fields": [
+      {
+        "id": "nextSteps",
+        "type": "info",
+        "label": "",
+        "infoText": {
+          "en": "We sent an email to **${newEmail orElse auth.email}** with your submission reference.\n\n The email does not include your answers, or a link to get back to this page.\n\n <h2 class='govuk-heading-m'>If you want a copy of your answers</h2> \n\n[Print or save a copy of your form (opens in new tab)](${link.printAcknowledgementPdf})",
+          "cy": "Anfonwyd e-bost at **${newEmail orElse auth.email}** gyda’ch cyfeirnod cyflwyno.\n\n Nid yw’r e-bost yn cynnwys eich atebion na chysylltiad i fynd yn ôl i’r dudalen hon.\n\n <h2 class='govuk-heading-m'>Os hoffech gopi o'ch atebion</h2> \n\n[Argraffwch neu cadwch gopi o’ch ffurflen (yn agor tab newydd)](${link.printAcknowledgementPdf})"
+        },
+        "infoType": "noformat"
+      }
+    ]
+  },
+  "destinations": [
+    {
+      "id": "attendedDmsQueueDestination",
+      "type": "hmrcDms",
+      "failOnError": true,
+      "convertSingleQuotes": true,
+      "dmsFormId": "IOSS",
+      "customerId": "${yourIOSSasIntermediary orElse companyIOSS}",
+      "classificationType": "Universal-Mixed-Queue 3",
+      "businessArea": "Universal"
+    }
+  ]
+}
+
+
+#+end_src
+
+#+RESULTS:
+#+begin_src ob-verb-response
+HTTP/1.1 204 No Content
+Cache-Control: no-cache,no-store,max-age=0
+Date: Sat, 02 Apr 2022 08:44:06 GMT
+#+end_src

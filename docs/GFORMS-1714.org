@@ -1,0 +1,345 @@
+
+#+begin_src verb :wrap src ob-verb-response
+        post http://localhost:9196/gform/formtemplates
+        Content-Type: application/json; charset=utf-8
+
+  {
+    "_id": "tell-hmrc-your-annual-paye-settlement-agreement-amount-temp",
+    "formName": "Tell HMRC your annual PAYE Settlement Agreement amount",
+    "description": "Use this form to tell HMRC your annual PAYE Settlement Agreement amount",
+    "draftRetrievalMethod": "formAccessCodeForAgents",
+    "emailTemplateId": "eeitt_submission_confirmation",
+    "authConfig": {
+      "authModule": "composite",
+      "configs": [
+        {
+          "authModule": "hmrc"
+        },
+        {
+          "authModule": "email",
+          "emailCodeTemplate": "res1_code"
+        }
+      ]
+    },
+    "expressions": {
+      "email": "auth.email",
+      "taxYear": "22",
+      "niRate": "if taxYear contains 0 then 13.8 else 13.8",
+      "ukBasicRate": "if taxYear contains 0 then 20 else 20",
+      "ukHigherRate": "if taxYear contains 0 then 40 else 40",
+      "ukAdditionalRate": "if taxYear contains 0 then 45 else 45",
+      "ukBasicGrossedTax": {
+        "type": "sterling",
+        "value": "ukBasicVbTaxPayer * (ukBasicRate / 100) * (100 / (100 - ukBasicRate))",
+        "round": "HalfUp"
+      },
+      "ukHigherGrossedTax": {
+        "type": "sterling",
+        "value": "ukHigherVbTaxPayer * (ukHigherRate / 100) * (100 / (100 - ukHigherRate))",
+        "round": "HalfUp"
+      },
+      "ukAdditionalGrossedTax": {
+        "type": "sterling",
+        "value": "ukAdditionalVbTaxPayer * (ukAdditionalRate / 100) * (100 / (100 - ukAdditionalRate))",
+        "round": "HalfUp"
+      },
+      "ukTotalCostBE": {
+        "type": "sterling",
+        "value": "ukBasicVbTaxPayer + ukHigherVbTaxPayer + ukAdditionalVbTaxPayer"
+      },
+      "ukTotalTaxDue": {
+        "type": "sterling",
+        "value": "ukBasicGrossedTax + ukHigherGrossedTax + ukAdditionalGrossedTax"
+      },
+      "ukTotalClass1B": {
+        "type": "sterling",
+        "value": "(ukTotalCostBE + ukTotalTaxDue) * (niRate / 100)",
+        "round": "HalfUp"
+      },
+      "ukTotalOverallDue": {
+        "type": "sterling",
+        "value": "ukTotalTaxDue + ukTotalClass1B"
+      },
+      "ukTotalOverallDueSum": {
+        "type": "sterling",
+        "value": "ukTotalTaxDue.sum + ukTotalClass1B.sum"
+      }
+    },
+    "booleanExpressions": {
+      "emailLogin": "auth.email != ''",
+      "agent": "user.affinityGroup = 'agent'"
+    },
+    "sections": [
+      {
+        "title": "Which tax year are you telling HMRC about?",
+        "presentationHint": "invisiblePageTitle",
+        "fields": [
+          {
+            "type": "choice",
+            "shortName": "Tax year",
+            "id": "taxYear",
+            "label": "Which tax year are you telling HMRC about?",
+            "errorMessage": "Select which tax year you are telling HMRC about",
+            "choices": [
+              "20${taxYear-1} to 20${taxYear}",
+              "20${taxYear-2} to 20${taxYear-1}"
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Which tax rates apply to the employees that received the benefits or expenses?",
+        "presentationHint": "invisiblePageTitle",
+        "fields": [
+          {
+            "type": "choice",
+            "shortName": "Tax rates",
+            "id": "nation",
+            "label": "Which tax rates apply to the employees that received the benefits or expenses?",
+            "helpText": "Select all that apply.",
+            "multivalue": "true",
+            "errorMessage": "Select which tax rates apply to the employees that received the benefits or expenses",
+            "choices": [
+              "English, Northern Irish",
+              "Scottish",
+              "Welsh"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "listOfNotificationsEngland",
+        "includeIf": "${nation contains 0}",
+        "type": "addToList",
+        "title": "Benefits and expenses at English and Northern Irish rates",
+        "summaryName": "English and Northern Irish rates ",
+        "shortName": "Benefit or expense $n",
+        "description": "**$n.** ${beType}. <br><strong>Amount due: ${ukTotalOverallDue}</strong>",
+        "summaryDescription": "${beType}. <br><strong>Amount due: ${ukTotalOverallDue}</strong>",
+        "addAnotherQuestion": {
+          "id": "addNotification",
+          "type": "choice",
+          "label": "Do you want to add another benefit or expense for employees on these tax rates?",
+          "format": "yesno",
+          "errorMessage": "Select whether you want to add another benefit or expense"
+        },
+        "defaultPage": {
+          "title": "Add your first benefit or expense for English and Northern Irish tax rates on the next page",
+          "fields": [
+            {
+              "id": "userUploadInfo1",
+              "type": "info",
+              "label": "",
+              "infoText": "You will need to add benefits and expenses one at a time.\n\nAfter you tell us about the first one, you can add others.",
+              "infoType": "noformat"
+            }
+          ]
+        },
+        "cyaPage": {
+          "updateTitle": "Check your answers for this benefit or expense",
+          "title": "Check your answers for this benefit or expense",
+          "footer": "<table class=\"govuk-table\">\n<caption class=\"govuk-table__caption govuk-table__caption--m\">Subtotal for this benefit or expense</caption>\n<thead class=\"govuk-table__head\">\n<tr class=\"govuk-table__row\">\n<th scope=\"col\" class=\"govuk-table__header\">Description</th>\n<th scope=\"col\" class=\"govuk-table__header govuk-table__header--numeric\">Amount</th>\n</tr>\n</thead>\n<tbody class=\"govuk-table__body\">\n<tr class=\"govuk-table__row\">\n<th scope=\"row\" class=\"govuk-table__cell\">Value paid</th>\n<td class=\"govuk-table__cell govuk-table__cell--numeric\">${ukTotalCostBE}</td>\n</tr>\n<tr class=\"govuk-table__row\">\n<th scope=\"row\" class=\"govuk-table__header\">Tax due</th>\n<td class=\"govuk-table__cell govuk-table__cell--numeric\">${ukTotalTaxDue}</td>\n</tr>\n<tr class=\"govuk-table__row\">\n<th scope=\"row\" class=\"govuk-table__header\">Class 1B National Insurance due </th>\n<td class=\"govuk-table__cell govuk-table__cell--numeric\">${ukTotalClass1B}</td>\n  <tr class=\"govuk-table__row\">\n<th scope=\"row\" class=\"govuk-table__header govuk-!-padding-top-4\">Subtotal due</th>\n<td class=\"govuk-table__cell govuk-table__cell--numeric\"><span class=\"govuk-heading-l govuk-!-margin-0\">${ukTotalOverallDue}</span></td>\n</tr>\n </tbody>\n</table>"
+        },
+        "pages": [
+          {
+            "title": "Which benefit or expense was paid to employees on English and Northern Irish rates?",
+            "presentationHint": "invisiblePageTitle",
+            "fields": [
+              {
+                "type": "revealingChoice",
+                "id": "beType",
+                "helpText": "Only select a benefit or expense if it is included in the PAYE Settlement Agreement.",
+                "shortName": "Benefit or expense $n",
+                "label": "Which benefit or expense was paid to employees on English and Northern Irish rates?",
+                "errorMessage": "Select which benefit or expense was paid to employees",
+                "choices": [
+                  "Telephone or internet",
+                  "Staff entertainment",
+                  "Staff incentives or gifts",
+                  "Small gifts and vouchers",
+                  "Travel",
+                  "Medical",
+                  "Other"
+                ],
+                "revealingFields": [
+                  [],
+                  [],
+                  [],
+                  [],
+                  [],
+                  [],
+                  [
+                    {
+                      "id": "otherText",
+                      "type": "text",
+                      "label": "Name of other benefit or expense",
+                      "format": "text"
+                    }
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "title": "Which English and Northern Irish tax rates apply to the employees that received this?",
+            "presentationHint": "invisiblePageTitle",
+            "progressIndicator": "${beType}",
+            "fields": [
+              {
+                "id": "chooseTaxRatesEN",
+                "type": "choice",
+                "label": "Which English and Northern Irish tax rates apply to the employees that received this?",
+                "shortName": "Tax rates",
+                "helpText": "Select all that apply.",
+                "multivalue": "true",
+                "errorMessage": "Select which tax rates apply to the employees that received this",
+                "choices": [
+                  "${ukBasicRate}% or below",
+                  "${ukHigherRate}%",
+                  "${ukAdditionalRate}%"
+                ]
+              },
+              {
+                "id": "InfoBasicUk",
+                "type": "info",
+                "label": "",
+                "infoType": "standard",
+                "infoText": "Benefits or expenses received by employees on rates of ${ukBasicRate}% or below are all taxed at ${ukBasicRate}%"
+              }
+            ]
+          },
+          {
+            "title": "What was the value paid to employees on English and Northern Irish rates of ${ukBasicRate}% or below?",
+            "shortName": "${ukBasicRate}% rate details",
+            "progressIndicator": "${beType}",
+            "includeIf": "${chooseTaxRatesEN contains 0}",
+            "fields": [
+              {
+                "id": "ukBasicVbTaxPayer",
+                "type": "text",
+                "shortName": "Value, taxable at ${ukBasicRate}%",
+                "label": "Total value of benefit or expense paid, including VAT",
+                "labelSize": "s",
+                "helpText": "For example 600 or 930.26",
+                "format": "sterling"
+              },
+              {
+                "id": "ukBasicNoTaxPayer",
+                "type": "text",
+                "shortName": "Employees at ${ukBasicRate}% or below",
+                "label": "Number of employees paid",
+                "labelSize": "s",
+                "format": "number"
+              }
+            ]
+          },
+          {
+            "title": "What was the value paid to employees on an English and Northern Irish rate of ${ukHigherRate}%?",
+            "shortName": "${ukHigherRate}% rate details",
+            "progressIndicator": "${beType} ",
+            "includeIf": "${chooseTaxRatesEN contains 1}",
+            "fields": [
+              {
+                "id": "ukHigherVbTaxPayer",
+                "type": "text",
+                "shortName": "Value, taxable at ${ukHigherRate}%",
+                "label": "Total value of benefit or expense paid, including VAT",
+                "labelSize": "s",
+                "helpText": "For example 600 or 930.26",
+                "format": "sterling"
+              },
+              {
+                "id": "ukHigherNoTaxPayer",
+                "type": "text",
+                "shortName": "Employees at ${ukHigherRate}%",
+                "label": "Number of employees paid",
+                "labelSize": "s",
+                "format": "number"
+              }
+            ]
+          },
+          {
+            "title": "What was the value paid to employees on an English and Northern Irish rate of ${ukAdditionalRate}%?",
+            "shortName": "${ukAdditionalRate}% rate details",
+            "progressIndicator": "${beType}",
+            "includeIf": "${chooseTaxRatesEN contains 2}",
+            "fields": [
+              {
+                "id": "ukAdditionalVbTaxPayer",
+                "type": "text",
+                "shortName": "Value, taxable at ${ukAdditionalRate}%",
+                "label": "Total value of benefit or expense paid, including VAT",
+                "labelSize": "s",
+                "helpText": "For example 600 or 930.26",
+                "format": "sterling"
+              },
+              {
+                "id": "ukAdditionalNoTaxPayer",
+                "type": "text",
+                "shortName": "Employees at ${ukAdditionalRate}%",
+                "label": "Number of employees paid",
+                "labelSize": "s",
+                "format": "number"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "summarySection": {
+      "title": "Check your answers",
+      "header": "",
+      "footer": "",
+      "continueLabel": "Accept and continue",
+      "fields": [
+        {
+          "id": "EnglandOnly",
+          "type": "info",
+          "label": "",
+          "infoText": "<table class=\"govuk-table\">\n<caption class=\"govuk-table__caption govuk-table__caption--m\">Totals</caption>\n<thead class=\"govuk-table__head\">\n<tr class=\"govuk-table__row\">\n<th scope=\"col\" class=\"govuk-table__header\">Tax rates</th>\n<th scope=\"col\" class=\"govuk-table__header govuk-table__header--numeric\">Amount</th>\n</tr>\n</thead>\n<tbody class=\"govuk-table__body\">\n<tr class=\"govuk-table__row\">\n<th scope=\"row\" class=\"govuk-table__header govuk-!-padding-top-4\">English and Northern Irish</th>\n<td class=\"govuk-table__cell govuk-table__cell--numeric\">${ukTotalOverallDueSum}</td>\n</tr><th scope=\"row\" class=\"govuk-table__header govuk-!-padding-top-4\"><span class=\"govuk-heading-l govuk-!-margin-0\">Total amount due:</span></th>\n<td class=\"govuk-table__cell govuk-table__cell--numeric\"><span class=\"govuk-heading-l govuk-!-margin-0 govuk-!-padding-top-4\">${ukTotalOverallDueSum}</span></td>\n</tr>\n</tbody>\n</table>",
+          "infoType": "noformat"
+        }
+      ]
+    },
+    "acknowledgementSection": {
+      "title": "Acknowledgement Page",
+      "fields": [
+        {
+          "id": "nextSteps",
+          "type": "info",
+          "label": "",
+          "infoType": "noformat",
+          "infoText": "We sent a confirmation email to **${email}** with your submission reference. The email does not include a copy of your answers.\n\n[Print or save a copy of your form](${link.printAcknowledgementPdf})"
+        }
+      ]
+    },
+    "destinations": [
+      {
+        "id": "attendedDmsQueueDestination",
+        "type": "hmrcDms",
+        "failOnError": true,
+        "convertSingleQuotes": true,
+        "dmsFormId": "TBD",
+        "customerId": "${'name'}",
+        "classificationType": "TBD",
+        "businessArea": "TBD"
+      }
+    ]
+  }
+
+#+end_src
+
+#+RESULTS:
+#+begin_src ob-verb-response
+HTTP/1.1 400 Bad Request
+Cache-Control: no-cache,no-store,max-age=0
+Date: Tue, 26 Apr 2022 09:11:52 GMT
+Content-Type: application/json
+Content-Length: 154
+
+{
+  "error": "summarySection.fields.[id=EnglandOnly].infoText: ukTotalTaxDue doesn't exist in the form",
+  "occurrenceId": "e54bcaa5-4d96-475b-8b35-21ff41ee4f19"
+}
+#+end_src
+

@@ -1,0 +1,100 @@
+
+#+begin_src verb :wrap src ob-verb-response
+       post http://localhost:9196/gform/formtemplates
+       Content-Type: application/json; charset=utf-8
+
+  {
+      "_id": "TST123",
+      "formName": "Choice Hint tttt",
+      "languages": [
+          "en",
+          "cy"
+      ],
+      "sections": [
+          {
+              "title": "Page A",
+              "fields": [
+                  {
+                      "id": "simple",
+                      "label": "Simple",
+                      "type": "choice",
+                      "dividerPosition": 4,
+                      "noneChoice": 6,
+                      "multivalue": "true",
+                      "dividerText": "OR/AND",
+                      "errorMessage": {
+                          "en": "Testing",
+                          "cy": "Testing"
+                      },
+                      "noneChoiceError": {
+                          "en": "Testing1",
+                          "cy": "Testing2"
+                      },
+                      "choices": [
+                          "Choice 1",
+                          "Choice 2",
+                          "Choice 3",
+                          "Choice 4",
+                          "Choice 5",
+                          "Choice 6"
+                      ]
+                  }
+              ]
+          },
+          {
+              "title": "Another Choice ${simple} ${tradesUnderDifferentName1}",
+              "fields": [
+                  {
+                      "id": "tradesUnderDifferentName1",
+                      "type": "choice",
+                      "label": "Trading Details",
+                      "choices": [
+                          "Address",
+                          "Date",
+                          "FileUpload",
+                          "SortCode",
+                          "Telephone",
+                          "Tax Amount",
+                          "bankAccountNumber"
+                      ],
+                      "multivalue": "true",
+                      "dividerText": "AND",
+                      "dividerPosition": 4,
+                      "noneChoice": 6,
+                      "noneChoiceError": {
+                          "en": "Testing123",
+                          "cy": "Testing1234"
+                      }
+                  }
+              ]
+          }
+      ],
+      "emailTemplateId": "confirmation",
+      "authConfig": {
+          "authModule": "hmrc"
+      },
+      "declarationSection": {
+          "title": "Declaration",
+          "fields": []
+      },
+      "acknowledgementSection": {
+          "title": "Confirmation page",
+          "fields": []
+      },
+      "destinations": [
+          {
+              "id": "transitionToSubmitted",
+              "type": "stateTransition",
+              "requiredState": "Submitted"
+          }
+      ]
+  }
+
+#+end_src
+
+#+RESULTS:
+#+begin_src ob-verb-response
+HTTP/1.1 204 No Content
+Cache-Control: no-cache,no-store,max-age=0
+Date: Thu, 31 Mar 2022 13:14:43 GMT
+#+end_src

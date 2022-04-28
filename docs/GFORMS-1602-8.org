@@ -1,0 +1,104 @@
+
+#+begin_src verb :wrap src ob-verb-response
+    post http://localhost:9196/gform/formtemplates
+    Content-Type: application/json; charset=utf-8
+
+  {
+      "_id": "TST123",
+      "formName": "Text Box Component Testing tttt",
+      "description": "Testing standard text box component ",
+      "destinations": [
+          {
+              "id": "HMRCDMS",
+              "type": "hmrcDms",
+              "dmsFormId": "TST123",
+              "customerId": "${auth.gg}",
+              "classificationType": "BT-NRU-Environmental",
+              "businessArea": "FinanceOpsCorpT"
+          }
+      ],
+      "authConfig": {
+          "authModule": "hmrc"
+      },
+      "emailTemplateId": "eeitt_submission_confirmation",
+      "sections": [
+          {
+              "title": "Company Trading Details",
+              "fields": [
+                  {
+                      "id": "tradesUnderDifferentName",
+                      "type": "revealingChoice",
+                      "label": "Does your company trade under a different name?",
+                      "choices": [
+                          {
+                              "en": "Yes",
+                              "cy": "Yes1"
+                          },
+                          {
+                              "en": "no",
+                              "cy": "no1"
+                          }
+                      ],
+                      "revealingFields": [
+                          [
+                              {
+                                  "id": "tradingValueYes",
+                                  "type": "text",
+                                  "format": "sterling",
+                                  "label": "Trading value yes"
+                              }
+                          ],
+                          [
+                              {
+                                  "id": "haveIncludedInvoice",
+                                  "type": "choice",
+                                  "label": "Original invoice from the supplier",
+                                  "choices": [
+                                      "yes",
+                                      "no"
+                                  ]
+                              }
+                          ]
+                      ]
+                  }
+              ]
+          },
+          {
+              "title": "Text box ${tradingValueYes}",
+              "fields": [
+                  {
+                      "id": "textBox",
+                      "format": "text",
+                      "label": "Submission Reference",
+                      "value": "${form.submissionReference}"
+                  }
+              ]
+          }
+      ],
+      "declarationSection": {
+          "shortName": "Declaration",
+          "title": "Declaration",
+          "fields": []
+      },
+      "acknowledgementSection": {
+          "shortName": "Acknowledgement Page",
+          "title": "Acknowledgement Page",
+          "fields": [
+              {
+                  "type": "info",
+                  "id": "ackpageInfo",
+                  "label": "SomeContent",
+                  "infoText": "SomeContent"
+              }
+          ]
+      }
+  }
+
+#+end_src
+
+#+RESULTS:
+#+begin_src ob-verb-response
+HTTP/1.1 204 No Content
+Cache-Control: no-cache,no-store,max-age=0
+Date: Wed, 06 Apr 2022 09:39:08 GMT
+#+end_src

@@ -1,0 +1,375 @@
+* form for testing
+
+    post https://www.qa.tax.service.gov.uk/submissions/test-only/proxy-to-gform/gform/formtemplates
+      post http://localhost:9196/gform/formtemplates
+#+begin_src verb :wrap src ob-verb-response :file
+        post http://localhost:9196/gform/formtemplates
+        Content-Type: application/json; charset=utf-8
+        Csrf-Token: nocheck
+
+  {
+      "_id": "ask-about-the-coronavirus-job-retention-scheme",
+      "formName": {
+          "en": "Ask a question about the Coronavirus Job Retention Scheme",
+          "cy": "Gofyn cwestiwn am y Cynllun Cadw Swyddi yn sgil Coronafeirws"
+      },
+      "description": "Use this form to ask a question about the Coronavirus Job Retention Scheme.",
+      "developmentPhase": "beta",
+      "languages": [
+          "en",
+          "cy"
+      ],
+      "emailTemplateId": "cjrs_confirmation_submission",
+      "emailParameters": [
+          {
+              "value": "${fullName}",
+              "emailTemplateVariable": "customerName"
+          },
+          {
+              "value": "${workingDaysParam}",
+              "emailTemplateVariable": "workingDays"
+          }
+      ],
+      "userResearchUrl": "https://signup.take-part-in-research.service.gov.uk/?utm_campaign=Ask_a_question_about_the_Coronavirus_Job_Retention_Scheme&utm_source=Other&utm_medium=other&t=HMRC&id=339",
+      "authConfig": {
+          "authModule": "email",
+          "emailCodeTemplate": {
+              "en": "cjrs_code_submission",
+              "cy": "cjrs_code_submission_cy"
+          },
+          "emailCodeHelp": {
+              "en": "Confirm your email address - Coronavirus Job Retention Scheme enquiry",
+              "cy": "Cadarnhau’ch cyfeiriad e-bost - Ymholiad ynghylch y Cynllun Cadw Swyddi yn sgil Coronafeirws"
+          },
+          "emailUseInfo": {
+              "en": "We will also use this email address to send a confirmation email.",
+              "cy": "Byddwn hefyd yn defnyddio’r cyfeiriad e-bost hwn i anfon e-bost cadarnhau atoch."
+          },
+          "emailConfirmation": {
+              "en": "You can now continue to the 'Ask a question about the Coronavirus Job Retention Scheme' service.",
+              "cy": "Gallwch nawr fynd yn eich blaen i'r gwasanaeth 'Gofyn cwestiwn am y Cynllun Cadw Swyddi yn sgil Coronafeirws'."
+          }
+      },
+      "sections": [
+          {
+              "title": {
+                  "en": "Enter the details of the person filling in this form",
+                  "cy": "Nodwch fanylion y person sy'n llenwi'r ffurflen hon"
+              },
+              "shortName": {
+                  "en": "Your details",
+                  "cy": "Eich manylion"
+              },
+              "fields": [
+                  {
+                      "id": "personInfo",
+                      "type": "info",
+                      "label": "",
+                      "infoText": {
+                          "en": "We will use these details to contact you about your question.",
+                          "cy": "Byddwn yn defnyddio’r manylion hyn i gysylltu â chi am eich cwestiwn."
+                      },
+                      "infoType": "noformat"
+                  },
+                  {
+                      "displayWidth": "l",
+                      "id": "fullName",
+                      "type": "text",
+                      "format": "text",
+                      "label": {
+                          "en": "Full name",
+                          "cy": "Enw llawn"
+                      }
+                  },
+                  {
+                      "id": "contactNumber",
+                      "type": "text",
+                      "format": "telephoneNumber",
+                      "label": {
+                          "en": "Telephone number",
+                          "cy": "Rhif ffôn"
+                      },
+                      "helpText": {
+                          "en": "Enter the full telephone number including area code.",
+                          "cy": "Nodwch y rhif ffôn llawn, gan gynnwys cod yr ardal."
+                      }
+                  },
+                  {
+                      "id": "prefContact",
+                      "type": "revealingChoice",
+                      "shortName": {
+                          "en": "Are there any times of day you do not want us to call you",
+                          "cy": "A oes unrhyw amser o'r diwrnod nad ydych am i ni eich ffonio?"
+                      },
+                      "label": {
+                          "en": "Are there any times you would prefer us not to call you?",
+                          "cy": "A oes unrhyw amser y byddai'n well gennych i ni beidio c'ch ffonio?"
+                      },
+                      "errorMessage": {
+                          "en": "Select whether there are any times you would prefer us not to call you",
+                          "cy": "Dewiswch a oes unrhyw amser y byddai'n well gennych i ni beidio c'ch ffonio"
+                      },
+                      "helpText": {
+                          "en": "Usual call hours are weekdays between 8am and 8pm.",
+                          "cy": "Fel arfer, rydym yn ffonio o ddydd Llun i ddydd Gwener rhwng 8am ac 4pm."
+                      },
+                      "choices": [
+                          {
+                              "en": "Yes",
+                              "cy": "Iawn"
+                          },
+                          {
+                              "en": "No",
+                              "cy": "Na"
+                          }
+                      ],
+                      "revealingFields": [
+                          [
+                              {
+                                  "id": "contactPrefs",
+                                  "type": "text",
+                                  "helpText": {
+                                      "en": "Give details about times you would prefer us not to call. For example 'Between 8am and 11am'.",
+                                      "cy": "Rhowch fanylion am yr amseroedd y byddai'n well gennych i ni beidio â’ch ffonio. Er enghraifft 'Rhwng 8am ac 11am'."
+                                  },
+                                  "format": "text",
+                                  "size": "small",
+                                  "label": "",
+                                  "shortName": {
+                                      "en": "Details of times not to call you",
+                                      "cy": "Manylion yr amseroedd i beidio â’ch ffonio"
+                                 }
+
+                              }
+                          ],
+                          []
+                      ]
+                  },
+                  {
+                      "id": "workingDaysText",
+                      "type": "text",
+                      "format": "text",
+                      "label": "",
+                      "value": "${'within 2 working days. Working hours are 8am to 8pm'}",
+                      "presentationHint": "invisibleInSummary",
+                      "submitMode": "summaryinfoonly"
+                  },
+                  {
+                      "id": "workingDaysParam",
+                      "type": "text",
+                      "format": "text",
+                      "label": "",
+                      "value": "${workingDaysText}",
+                      "presentationHint": "invisibleInSummary",
+                      "submitMode": "summaryinfoonly"
+                  },
+                  {
+                      "id": "email",
+                      "type": "text",
+                      "label": {
+                          "en": "Email address",
+                          "cy": "Cyfeiriad e-bost"
+                      },
+                      "value": "${auth.email}",
+                      "submitMode": "derived",
+                      "presentationHint": "invisibleInSummary",
+                      "format": "text"
+                  }
+              ]
+          },
+          {
+              "title": {
+                  "en": "What is the company name of the employer?",
+                  "cy": "Beth yw enw cwmni'r cyflogwr?"
+              },
+              "shortName": {
+                  "en": "Name of employer",
+                  "cy": "Enwr cyflogwr"
+              },
+              "fields": [
+                  {
+                      "displayWidth": "l",
+                      "id": "employerName",
+                      "type": "text",
+                      "shortName": {
+                          "en": "Employer name",
+                          "cy": "Enwr cyflogwr"
+                      },
+                      "format": "text",
+                      "label": {
+                          "en": "What is the company name of the employer?",
+                          "cy": "Beth yw enw cwmnir cyflogwr?"
+                      },
+                      "helpText": {
+                          "en": "Enter the name of the employer making this enquiry. If you are an agent  give the name of employer that your enquiry is for.",
+                          "cy": "Nodwch enw'r cyflogwr sy'n gwneud yr ymholiad hwn. Os ydych yn asiant, rhowch enw'r cyflogwr y mae eich ymholiad ar ei gyfer."
+                      }
+                  }
+              ]
+          },
+          {
+              "title": {
+                  "en": "What is the employer PAYE reference number for ${employerName}?",
+                  "cy": "Beth yw cyfeirnod TWE y cyflogwr ar gyfer ${employerName}?"
+              },
+              "noPIITitle": {
+                  "en": "What is the employer PAYE reference number for the business?",
+                  "cy": "Beth yw cyfeirnod TWE y cyflogwr ar gyfer y busnes?"
+              },
+              "shortName": {
+                  "en": "PAYE reference",
+                  "cy": "Cyfeirnod TWE"
+              },
+              "fields": [
+                  {
+                      "displayWidth": "l",
+                      "id": "employerPAYE",
+                      "type": "text",
+                      "shortName": {
+                          "en": "Employer PAYE reference",
+                          "cy": "Cyfeirnod TWE y Cyflogwr"
+                      },
+                      "format": "text",
+                      "label": {
+                          "en": "What is the employer PAYE reference number for ${employerName}?",
+                          "cy": "Beth yw cyfeirnod TWE y cyflogwr ar gyfer ${employerName}?"
+                      },
+                      "helpText": {
+                          "en": "This is a 3 digit tax office number,  a forward slash  and a tax employer reference,  like 123/AB456. It may be called 'Employer PAYE reference' or 'PAYE reference'.",
+                          "cy": "Rhif swyddfa dreth 3 digid yw hwn, wedi'i ddilyn gan flaenslaes a chyfeirnod treth y cyflogwr, megis 123/AB456. Efallai y bydd yn cael ei alw'n 'Cyfeirnod TWE y Cyflogwr' neu'n 'Cyfeirnod TWE'."
+                      }
+                  }
+              ]
+          },
+          {
+              "title": {
+                  "en": "What is your question?",
+                  "cy": "Beth yw'ch cwestiwn?"
+              },
+              "shortName": {
+                  "en": "Question",
+                  "cy": "Cwestiwn"
+              },
+              "fields": [
+                  {
+                      "id": "question",
+                      "shortName": {
+                          "en": "Your question",
+                          "cy": "Eich cwestiwn"
+                      },
+                      "helpText": {
+                          "en": "Briefly describe what you would like us to call you about.",
+                          "cy": "Esboniwch yn gryno'r hyn yr hoffech i ni eich ffonio amdano."
+                      },
+                      "type": "text",
+                      "format": "text",
+                      "label": {
+                          "en": "What is your question?",
+                          "cy": "Beth yw'ch cwestiwn?"
+                      },
+                      "multiline": "true"
+                  }
+              ]
+          }
+      ],
+      "declarationSection": {
+          "title": {
+              "en": "Final step",
+              "cy": "Cam olaf"
+          },
+          "shortName": {
+              "en": "Final step",
+              "cy": "Cam olaf"
+          },
+          "fields": [
+              {
+                  "id": "decInfo",
+                  "type": "info",
+                  "infoType": "noformat",
+                  "label": "",
+                  "infoText": {
+                      "en": "Submit your question to HMRC.",
+                      "cy": "Cyflwynwch eich cwestiwn i CThEM."
+                  }
+              }
+          ]
+      },
+      "summarySection": {
+          "title": {
+              "en": "Check your answers",
+              "cy": "Gwiriwch eich atebion"
+          },
+          "header": {
+              "en": "Make sure the information you have given is correct.",
+              "cy": "Sicrhewch fod y wybodaeth rydych wedi'i rhoi yn gywir."
+          },
+          "footer": {
+              "en": "#Next steps\n\nYou need to submit your form on the next screen.",
+              "cy": "#Camau nesaf\n\nMae angen i chi gyflwyno'ch ffurflen ar y sgrin nesaf."
+          }
+      },
+      "acknowledgementSection": {
+          "title": {
+              "en": "Confirmation page",
+              "cy": "Tudalen gadarnhau"
+          },
+          "shortName": {
+              "en": "Acknowledgement Page",
+              "cy": "Tudalen gydnabyddiaeth"
+          },
+          "fields": [
+              {
+                  "id": "nextSteps",
+                  "type": "info",
+                  "label": "",
+                  "infoText": {
+                      "en": "We have sent you a confirmation email.\n\n[Print or save a PDF copy of your form](${link.printAcknowledgementPdf})\n## What happens next",
+                      "cy": "Rydym wedi anfon e-bost cadarnhau atoch.\n\n[Argraffu neu gadw copi PDF o'ch ffurflen](${link.printAcknowledgementPdf})\n## Yr hyn sy'n digwydd nesaf"
+                  },
+                  "infoType": "noformat"
+              },
+              {
+                  "id": "whatNextInfo",
+                  "type": "info",
+                  "label": "",
+                  "infoText": {
+                      "en": "HMRC will call you back on the telephone number you provided ${workingDaysText}, Monday to Friday.\n\n [Information about the Coronavirus Job Retention Scheme](https://www.gov.uk/government/news/further-details-of-coronavirus-job-retention-scheme-announced) can be found on GOV.UK.",
+                      "cy": "Bydd CThEM yn eich ffonio yn ôl, ar y rhif ffôn y gwnaethoch ei roi, cyn pen 2 ddiwrnod gwaith. Yr oriau gwaith yw 08:00 tan 16:00, dydd Llun i ddydd Gwener.\n\n Mae [gwybodaeth am y Cynllun Cadw Swyddi yn sgil Coronafeirws](https://www.gov.uk/government/news/further-details-of-coronavirus-job-retention-scheme-announced) iw chael ar GOV.UK."
+                  },
+                  "infoType": "noformat"
+              }
+          ]
+      },
+      "destinations": [
+          {
+              "id": "dmsQueueDestination",
+              "type": "hmrcDms",
+              "failOnError": true,
+              "convertSingleQuotes": true,
+              "dmsFormId": "JRS-question",
+              "customerId": "${employerPAYE}",
+              "classificationType": "Job Retention-DFS",
+              "businessArea": "Universal"
+          }
+      ]
+  }
+
+
+#+end_src
+
+#+RESULTS:
+#+begin_src ob-verb-response
+HTTP/1.1 400 Bad Request
+Cache-Control: no-cache,no-store,max-age=0
+Date: Mon, 25 Apr 2022 14:17:55 GMT
+Content-Type: application/json
+Content-Length: 161
+
+{
+  "error": "text component contactPrefs should have a non-blank label, unless submitMode is summaryinfoonly",
+  "occurrenceId": "90393558-a829-4eb0-9b16-ee1f2e7e2fc6"
+}
+#+end_src
+
+
+

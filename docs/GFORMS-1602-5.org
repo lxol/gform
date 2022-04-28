@@ -1,0 +1,228 @@
+* Ratheesh test
+       post http://localhost:9196/gform/formtemplates
+       post https://www.qa.tax.service.gov.uk/submissions/test-only/proxy-to-gform/gform/formtemplates
+#+begin_src verb :wrap src ob-verb-response
+           post http://localhost:9196/gform/formtemplates
+           Content-Type: application/json; charset=utf-8
+           Csrf-Token: nocheck
+
+{
+    "_id": "TST123",
+    "formName": "Confirmation page tttt",
+    "description": "",
+    "languages": [
+        "en",
+        "cy"
+    ],
+    "destinations": [
+        {
+            "id": "HMRCDMS",
+            "type": "hmrcDms",
+            "includeIf": "true",
+            "dmsFormId": "LT100",
+            "customerId": "${' '}",
+            "classificationType": "BT-NRU-Environmental",
+            "businessArea": "BT"
+        }
+    ],
+    "emailTemplateId": "al_registration_confirmation",
+    "authConfig": {
+        "authModule": "hmrc"
+    },
+    "sections": [
+        {
+            "title": "Bank Account Validation",
+            "id": "toBeConfirmedId",
+            "fields": [
+                {
+                    "id": "companyName",
+                    "label": "BankName",
+                    "mandatory": "true",
+                    "format": "text"
+                },
+                {
+                    "id": "BankHolderName",
+                    "label": "BankHolderName",
+                    "mandatory": "true",
+                    "format": "text"
+                },
+                {
+                    "id": "sortCode",
+                    "label": "Sort Code",
+                    "mandatory": "true",
+                    "format": "ukSortCode"
+                },
+                {
+                    "id": "accountNumber",
+                    "label": "Account Number",
+                    "format": "ukBankAccountNumber"
+                }
+            ],
+            "comment": "Valid data at: https://github.com/hmrc/bank-account-reputation-stub#business-account-test-data",
+            "dataRetrieve": {
+                "type": "businessBankAccountExistence",
+                "id": "businessBankDetails",
+                "parameters": {
+                    "sortCode": "${sortCode}",
+                    "accountNumber": "${accountNumber}",
+                    "companyName": "${companyName}"
+                }
+            }
+        },
+        {
+            "title": "Confirmation page ${dataRetrieve.businessBankDetails.accountNumberIsWellFormatted}",
+            "includeIf": "${dataRetrieve.businessBankDetails.accountNumberIsWellFormatted='no'}",
+            "fields": [
+                {
+                    "id": "contentInfo",
+                    "label": "",
+                    "type": "info",
+                    "infoType": "noformat",
+                    "infoText": "Please double check entered details on previous page"
+                }
+            ],
+            "confirmation": {
+                "question": {
+                    "id": "confirmationQuestion",
+                    "type": "choice",
+                    "label": "I confirm that entered detail are correct",
+                    "format": "yesno"
+                },
+                "pageId": "toBeConfirmedId"
+            }
+        },
+        {
+            "title": "Confirmation page ${dataRetrieve.businessBankDetails.accountNumberIsWellFormatted}",
+            "includeIf": "${dataRetrieve.businessBankDetails.accountNumberIsWellFormatted='yes'}",
+            "fields": [
+                {
+                    "id": "contentInfo1",
+                    "label": "",
+                    "type": "info",
+                    "infoType": "noformat",
+                    "infoText": "Please double check entered details on previous page"
+                }
+            ],
+            "confirmation": {
+                "question": {
+                    "id": "confirmationQuestion1",
+                    "type": "choice",
+                    "label": "I confirm that entered detail are correct",
+                    "format": "yesno"
+                },
+                "pageId": "toBeConfirmedId"
+            }
+        },
+        {
+            "id": "owner",
+            "type": "addToList",
+            "title": "This is for AddToList",
+            "summaryName": "owner",
+            "shortName": "${'ownerName'}",
+            "infoMessage": "<details class='govuk-details' data-module='govuk-details'> <summary class='govuk-details__summary'> <span class='govuk-details__summary-text'> Help with nationality </span> </summary> <div class='govuk-details__text'> We need to know your nationality so we can work out which elections you're entitled to vote in.</div> </details>",
+            "description": "${'ownerName'} ",
+            "summaryDescription": "${'ownerName'} ",
+            "addAnotherQuestion": {
+                "id": "ownerFc",
+                "type": "choice",
+                "label": "So you want to add another owner?",
+                "format": "yesno",
+                "helpText": "For children's homes, an individual provider may be more than one person."
+            },
+            "defaultPage": {
+                "title": "Add details",
+                "fields": [
+                    {
+                        "id": "dp1",
+                        "label": "",
+                        "type": "info",
+                        "infoType": "noformat",
+                        "infoText": "You must tell us about all directors"
+                    }
+                ]
+            },
+            "cyaPage": {
+                "updateTitle": "${if ownerFc.count=1 then if form.lang='en' then 'Director' else 'cy-Director' else if form.lang='en' then 'Directors' else 'cy-Directors'}"
+            },
+            "pages": [
+                {
+                    "title": "Bank Account Validation",
+                    "id": "toBeConfirmedId1",
+                    "fields": [
+                        {
+                            "id": "companyName1",
+                            "label": "BankName",
+                            "mandatory": "true",
+                            "format": "text"
+                        },
+                        {
+                            "id": "BankHolderName1",
+                            "label": "BankHolderName",
+                            "mandatory": "true",
+                            "format": "text"
+                        },
+                        {
+                            "id": "sortCode1",
+                            "label": "Sort Code",
+                            "mandatory": "true",
+                            "format": "ukSortCode"
+                        },
+                        {
+                            "id": "accountNumber1",
+                            "label": "Account Number",
+                            "format": "ukBankAccountNumber"
+                        }
+                    ],
+                    "comment": "Valid data at: https://github.com/hmrc/bank-account-reputation-stub#business-account-test-data",
+                    "dataRetrieve": {
+                        "type": "businessBankAccountExistence",
+                        "id": "businessBankDetails1",
+                        "parameters": {
+                            "sortCode": "${sortCode1}",
+                            "accountNumber": "${accountNumber1}",
+                            "companyName": "${companyName1}"
+                        }
+                    }
+                },
+                {
+                    "title": "Confirmation page ${dataRetrieve.businessBankDetails1.accountNumberIsWellFormatted}",
+                    "fields": [
+                        {
+                            "id": "contentInfo3",
+                            "label": "",
+                            "type": "info",
+                            "infoType": "noformat",
+                            "infoText": "Please double check entered details on previous page"
+                        }
+                    ],
+                    "confirmation": {
+                        "question": {
+                            "id": "confirmationQuestion3",
+                            "type": "choice",
+                            "label": "I confirm that entered detail are correct",
+                            "choices": [
+                                "Yes, use these account details",
+                                "No, I want to change the account details"
+                            ]
+                        },
+                        "pageId": "toBeConfirmedId1"
+                    }
+                }
+            ]
+        }
+    ],
+    "acknowledgementSection": {
+        "title": "",
+        "fields": []
+    }
+}
+
+#+end_src
+
+#+RESULTS:
+#+begin_src ob-verb-response
+HTTP/1.1 204 No Content
+Cache-Control: no-cache,no-store,max-age=0
+Date: Tue, 05 Apr 2022 11:37:26 GMT
+#+end_src
+

@@ -1,0 +1,314 @@
+
+#+begin_src verb :wrap src ob-verb-response
+    post http://localhost:9196/gform/formtemplates
+    Content-Type: application/json; charset=utf-8
+
+  {
+      "_id": "summaryTest",
+      "formName": {
+          "en": "Make a comment or complaint about HMRC consultations",
+          "cy": "Gwneud sylw neu gŵyn am ymgynghoriadau CThEM"
+      },
+      "description": "Use this form to make a comment or complaint about HMRC consultations",
+      "userResearchUrl": "https://signup.take-part-in-research.service.gov.uk/?utm_campaign=Make_a_comment_or_complaint_about_HMRC_consultations&utm_source=Other&utm_medium=other&t=HMRC&id=302",
+      "emailTemplateId": "consultation_complaint_confirmation",
+      "emailParameters": [
+          {
+              "value": "${fullName}",
+              "emailTemplateVariable": "customerName"
+          },
+          {
+              "value": "${consultationName}",
+              "emailTemplateVariable": "consultationName"
+          }
+      ],
+      "developmentPhase": "beta",
+      "languages": [
+          "en",
+          "cy"
+      ],
+      "expressions": {
+          "email": "if auth.email = '' then emailAddressGG else auth.email"
+      },
+      "authConfig": {
+          "authModule": "composite",
+          "configs": [
+              {
+                  "authModule": "hmrc"
+              },
+              {
+                  "authModule": "email",
+                  "emailCodeTemplate": {
+                      "en": "complaint_consultation_code",
+                      "cy": "complaint_consultation_code_cy"
+                  },
+                  "emailUseInfo": {
+                      "en": "We will also use this email address to send a confirmation email.",
+                      "cy": "Byddwn hefyd yn defnyddio’r cyfeiriad e-bost hwn i anfon e-bost cadarnhau atoch."
+                  }
+              }
+          ]
+      },
+      "sections": [
+          {
+              "title": {
+                  "en": "Enter your details",
+                  "cy": "Nodwch eich manylion"
+              },
+              "shortName": {
+                  "en": "Your details",
+                  "cy": "Eich manylion"
+              },
+              "fields": [
+                  {
+                      "id": "personInfo",
+                      "type": "info",
+                      "label": "",
+                      "infoText": {
+                          "en": "We will use these details to contact you about your comment or complaint",
+                          "cy": "Byddwn yn defnyddio’r manylion hyn i gysylltu â chi ynglŷn â’ch sylw neu’ch cwyn"
+                      },
+                      "infoType": "noformat"
+                  },
+                  {
+                      "id": "fullName",
+                      "type": "text",
+                      "format": "text",
+                      "label": {
+                          "en": "Full name",
+                          "cy": "Enw llawn"
+                      },
+                      "errorMessage": {
+                          "en": "You must enter your first and last name",
+                          "cy": "Mae’n rhaid i chi nodi’ch enw cyntaf a’ch enw olaf"
+                      }
+                  },
+                  {
+                      "id": "emailAddressGG",
+                      "includeIf": "${auth.email =''}",
+                      "type": "text",
+                      "label": {
+                          "en": "Email address",
+                          "cy": "Cyfeiriad e-bost"
+                      },
+                      "presentationHint": "invisibleInSummary",
+                      "format": "text"
+                  }
+              ]
+          },
+          {
+              "title": {
+                  "en": "How would you prefer to be contacted?",
+                  "cy": "Sut yr hoffech i ni gysylltu â chi?"
+              },
+              "shortName": {
+                  "en": "Preferred method of contact",
+                  "cy": "Dull cysylltu dewisol"
+              },
+              "fields": [
+                  {
+                      "id": "contactChoi",
+                      "type": "revealingChoice",
+                      "label": {
+                          "en": "Select which method of contact you would prefer",
+                          "cy": "Dewiswch pa ddull o gysylltu y byddai’n well gennych"
+                      },
+                      "errorMessage": {
+                          "en": "You must choose either email or telephone",
+                          "cy": "Mae’n rhaid i chi ddewis naill ai e-bost neu ffôn"
+                      },
+                      "choices": [
+                          {
+                              "en": "Email - ${email}",
+                              "cy": "E-bost - ${email}"
+                          },
+                          {
+                              "en": "Other email",
+                              "cy": "E-bost Arall"
+                          },
+                          {
+                              "en": "Telephone",
+                              "cy": "Ffôn"
+                          }
+                      ],
+                      "revealingFields": [
+                          [],
+                          [
+                              {
+                                  "id": "emailOther",
+                                  "type": "text",
+                                  "shortName": {
+                                      "en": "Contact email",
+                                      "cy": "Cysylltu drwy e-bost"
+                                  },
+                                  "format": "email",
+                                  "label": {
+                                      "en": "Email address",
+                                      "cy": "Cyfeiriad e-bost"
+                                  }
+                              }
+                          ],
+                          [
+                              {
+                                  "id": "contactNumber",
+                                  "type": "text",
+                                  "label": {
+                                      "en": "Telephone Number",
+                                      "cy": "Rhif ffôn"
+                                  },
+                                  "helpText": {
+                                      "en": "Enter the full telephone number including area code",
+                                      "cy": "Nodwch y rhif ffôn llawn, gan gynnwys cod yr ardal"
+                                  },
+                                  "format": "telephoneNumber"
+                              }
+                          ]
+                      ]
+                  }
+              ]
+          },
+          {
+              "title": {
+                  "en": "What consultation does the comment or complaint relate to?",
+                  "cy": "Â pha ymgynghoriad y mae’r sylw neu’r cwyn yn gysylltiedig?"
+              },
+              "shortName": {
+                  "en": "Consultation name",
+                  "cy": "Enw’r ymgynghoriad"
+              },
+              "fields": [
+                  {
+                      "id": "consultationName",
+                      "type": "text",
+                      "format": "text",
+                      "label": {
+                          "en": "What consultation does the comment or complaint relate to?",
+                          "cy": "Â pha ymgynghoriad y mae’r sylw neu’r cwyn yn gysylltiedig?"
+                      }
+                  }
+              ]
+          },
+          {
+              "title": {
+                  "en": "What comment or complaint do you wish to make about ${consultationName}?",
+                  "cy": "Pa sylw neu gŵyn ydych chi am ei wneud am ${consultationName}?"
+              },
+              "noPIITitle": {
+                  "en": "What comment or complaint do you wish to make about the consultation?",
+                  "cy": "Pa sylw neu gŵyn yr ydych am ei wneud am yr ymgynghoriad?"
+              },
+              "shortName": {
+                  "en": "Comment or complaint details",
+                  "cy": "Manylion y sylw neu gŵyn"
+              },
+              "fields": [
+                  {
+                      "id": "comCompDets",
+                      "type": "text",
+                      "format": "text(0,1500)",
+                      "label": {
+                          "en": "What comment or complaint do you wish to make about ${consultationName}?",
+                          "cy": "Pa sylw neu gŵyn ydych chi am ei wneud am ${consultationName}?"
+                      },
+                      "helpText": {
+                          "en": "Enter the details of your comment or complaint here",
+                          "cy": "Nodwch fanylion eich sylw neu’ch cwyn yma"
+                      },
+                      "multiline": "true"
+                  }
+              ]
+          }
+      ],
+     "declarationSection": {
+
+          "title": {
+              "en": "Final step",
+              "cy": "Cam olaf"
+          },
+          "shortName": {
+              "en": "Final step",
+              "cy": "Cam olaf"
+          },
+          "fields": [
+              {
+                  "id": "decInfo",
+                  "type": "info",
+                  "infoType": "noformat",
+                  "label": "",
+                  "infoText": {
+                      "en": "Send your comment or complaint to HMRC",
+                      "cy": "Anfon eich sylw neu gŵyn i CThEM"
+                  }
+              }
+          ]
+      },
+      "summarySection": {
+          "title": {
+              "en": "Check your answers",
+              "cy": "Gwiriwch eich atebion"
+          },
+          "header": {
+              "en": "Make sure the information you have given is correct",
+             "cy": "Sicrhewch fod y wybodaeth rydych wedi'i rhoi yn gywir"
+             
+          },
+          "footer": {
+              "en": "#Next steps\n\nYou need to submit your form on the next screen.",
+              "cy": "#Y camau nesaf\n\nMae angen i chi gyflwyno’ch ffurflen ar y sgrin nesaf."
+          }
+      },
+      "acknowledgementSection": {
+          "title": {
+              "en": "Confirmation page",
+              "cy": "Tudalen gadarnhau"
+          },
+          "shortName": {
+              "en": "Acknowledgement Page",
+              "cy": "Tudalen Gydnabod"
+          },
+          "fields": [
+              {
+                  "id": "nextSteps",
+                  "type": "info",
+                  "label": "",
+                  "infoText": {
+                      "en": "We have sent you a confirmation email.\n\n[Print or save a PDF copy of your form](${link.printAcknowledgementPdf})\n## What happens next",
+                      "cy": "Rydym wedi anfon e-bost cadarnhau atoch.\n\n[Argraffu neu gadw copi PDF o'ch ffurflen](${link.printAcknowledgementPdf})\n## Yr hyn sy'n digwydd nesaf"
+                  },
+                  "infoType": "noformat"
+              },
+              {
+                  "id": "whatNextInfo",
+                  "type": "info",
+                  "label": "",
+                  "infoText": {
+                      "en": "We will contact you using your preferred method as soon as possible.",
+                      "cy": "Byddwn yn cysylltu â chi gan ddefnyddio’ch dewis ddull cysylltu cyn gynted â phosibl."
+                  },
+                  "infoType": "noformat"
+              }
+          ]
+      },
+      "destinations": [
+          {
+              "id": "dmsQueueDestination",
+              "type": "hmrcDms",
+              "failOnError": true,
+              "convertSingleQuotes": true,
+              "dmsFormId": "complaint",
+              "customerId": "${fullName}",
+              "classificationType": "CS&TD-Complaints-Consultation",
+              "businessArea": "CS&TD"
+          }
+      ]
+  }
+
+#+end_src
+
+#+RESULTS:
+#+begin_src ob-verb-response
+HTTP/1.1 204 No Content
+Cache-Control: no-cache,no-store,max-age=0
+Date: Fri, 22 Apr 2022 16:43:28 GMT
+#+end_src
+

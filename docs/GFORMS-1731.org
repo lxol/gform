@@ -1,0 +1,68 @@
+* set up
+-DemailAuth.staticCodeEmails=test1@test.com:test2@test.com
+code: xxxx
+
+* form
+#+begin_src verb :wrap src ob-verb-response
+        post http://localhost:9196/gform/formtemplates
+        Content-Type: application/json; charset=utf-8
+
+  {
+    "_id": "TST1234",
+    "formName": "Email auth tests tttt",
+    "description": "Email auth Test",
+    "developmentPhase": "beta",
+    "emailTemplateId": "eeitt_submission_confirmation",
+    "authConfig": {
+      "authModule": "email",
+      "emailCodeTemplate": "tor_code"
+    },
+    "sections": [
+      {
+        "title": "Your email id is ${auth.email}",
+        "fields": [
+          {
+            "id": "details",
+            "type": "text",
+            "label": "Email Id",
+            "format": "text",
+            "value": "${auth.email}"
+          }
+        ]
+      }
+    ],
+    "declarationSection": {
+      "title": "Declaration",
+      "fields": []
+    },
+    "acknowledgementSection": {
+      "title": "Confirmation page ",
+      "shortName": "Acknowledgement Page",
+      "showReference": "true",
+      "fields": []
+    },
+    "destinations": [
+      {
+        "id": "attendedDmsQueueDestination",
+        "type": "hmrcDms",
+        "failOnError": true,
+        "convertSingleQuotes": true,
+        "dmsFormId": "CHANGEME",
+        "customerId": "${' '}",
+        "classificationType": "For example: BT-NRU-Environmental",
+        "businessArea": "For example: FinanceOpsCorpT",
+        "roboticsXml": true
+      }
+    ]
+  }
+
+
+#+end_src
+
+#+RESULTS:
+#+begin_src ob-verb-response
+HTTP/1.1 204 No Content
+Cache-Control: no-cache,no-store,max-age=0
+Date: Tue, 26 Apr 2022 07:42:16 GMT
+#+end_src
+

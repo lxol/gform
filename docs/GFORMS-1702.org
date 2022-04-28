@@ -1,0 +1,512 @@
+
+#+begin_src verb :wrap src ob-verb-response
+      post http://localhost:9196/gform/formtemplates
+      Content-Type: application/json; charset=utf-8
+
+  {
+    "_id": "request-pension-scheme-tax-refund",
+    "formName": "Request a pension scheme tax refund",
+    "description": "Use this form to request a pension scheme tax refund.",
+    "authConfig": {
+      "authModule": "hmrc"
+    },
+    "draftRetrievalMethod": "notPermitted",
+    "emailTemplateId": "pods_confirmation",
+    "emailParameters": [
+      {
+        "value": "${form.submissionReference}",
+        "emailTemplateVariable": "submissionReference"
+      },
+      {
+        "value": "${userNameHiddenPsp orElse userNameHiddenPsa}",
+        "emailTemplateVariable": "customerName"
+      }
+    ],
+    "languages": [
+      "en",
+      "cy"
+    ],
+    "referrerConfig": {
+      "allowedReferrerUrls": [
+        "tax.service.gov.uk"
+      ],
+      "exitMessage": "You must access this form from the [managing pension schemes service (opens in new tab).](https://www.gov.uk/guidance/manage-a-registered-pension-scheme)"
+    },
+    "expressions": {
+      "refundType": "if param.requestType = 1 then 'Request by scheme administrator' else if param.requestType = 2 then 'Request by practitioner' else  'Request by scheme administrator'",
+      "pstr": "if param.requestType != 3 then param.pstr else ''",
+      "userName": "if param.requestType = 2 then param.pspName else param.psaName",
+      "userNameLabel": "if param.requestType = 2 then 'Pension scheme practitioner name' else 'Pension scheme administrator name'",
+      "userId": "if param.requestType = 2 then if user.enrolments.HMRC-PODSPP-ORG.PSPID.count = 1 then user.enrolments.HMRC-PODSPP-ORG.PSPID.1 else pspID else if user.enrolments.HMRC-PODS-ORG.PSAID.count = 1 then user.enrolments.HMRC-PODS-ORG.PSAID.1 else psaID",
+      "userIdLabel": "if param.requestType = 2 then 'Pension scheme practitioner ID' else 'Pension scheme administrator ID'",
+      "email": "emailPsa orElse emailPsp",
+      "podsReturnUrl": "if param.requestType = 2 then 'https://www.tax.service.gov.uk/manage-pension-schemes/dashboard' else 'https://www.tax.service.gov.uk/manage-pension-schemes/overview'"
+    },
+    "sections": [
+      {
+        "title": "You cannot use this form",
+        "includeIf": "${param.availAmt = '' || (param.requestType != '1' && param.requestType != '2' && param.requestType != '3') || (param.requestType = '1' && (param.psaName = '' || param.pstr = '')) || (param.requestType = '2' && (param.pspName = '' || param.pstr = '')) || (param.requestType = '3' && param.psaName = '')}",
+        "continueIf": "false",
+        "fields": [
+          {
+            "id": "badVATInfo",
+            "type": "info",
+            "label": "",
+            "infoText": "You must access this form from the [managing pension schemes service (opens in new tab).](https://www.gov.uk/guidance/manage-a-registered-pension-scheme)",
+            "infoType": "noformat"
+          }
+        ]
+      },
+      {
+        "title": "What is the authorising administrator ID?",
+        "shortName": "Administrative details",
+        "includeIf": "${param.requestType = '2'}",
+        "fields": [
+          {
+            "id": "authAdmin",
+            "type": "text",
+            "format": "shortText",
+            "label": "What is the authorising administrator ID?",
+            "helpText": "This is the letter 'A' followed by 7 numbers, for example 'A1234567'.",
+            "shortName": "Authorising administrator ID",
+            "displayWidth": "m",
+            "validators": [
+              {
+                "validIf": "${authAdmin match '^[A][0-9]{7}$'}",
+                "errorMessage": "Enter an authorising administrator ID in the correct format"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "What is your email address?",
+        "presentationHint": "invisiblePageTitle",
+        "includeIf": "${param.requestType = '2'}",
+        "fields": [
+          {
+            "type": "info",
+            "id": "confirmEmailHelpTextPsp",
+            "label": "",
+            "infoType": "noformat",
+            "infoText": "We will use this to send a confirmation that your request has been received.",
+            "labelSize": "s"
+          },
+          {
+            "id": "refundTypePsp",
+            "label": "Refund type",
+            "type": "text",
+            "format": "text",
+            "value": "${refundType}",
+            "submitMode": "summaryinfoonly"
+          },
+          {
+            "id": "userNameHiddenPsp",
+            "label": "${userNameLabel}",
+            "type": "text",
+            "format": "text",
+            "value": "${userName}",
+            "submitMode": "summaryinfoonly"
+          },
+          {
+            "id": "userIdHiddenPsp",
+            "label": "${userIdLabel}",
+            "includeIf": "${user.enrolments.HMRC-PODSPP-ORG.PSPID.count = 1 || user.enrolments.HMRC-PODS-ORG.PSAID.count = 1}",
+            "type": "text",
+            "format": "text",
+            "value": "${userId}",
+            "submitMode": "summaryinfoonly"
+          },
+          {
+            "id": "emailPsp",
+            "type": "text",
+            "errorMessage": "Enter an email address in the correct format, like name@example.com",
+            "shortName": {
+              "en": "Email address",
+              "cy": "I ble allwn ni anfon e-bost cadarnhau?"
+            },
+            "helpText": "",
+            "label": {
+              "en": "Email address",
+              "cy": "Cyfeiriad e-bost"
+            },
+            "format": "email",
+            "displayWidth": "xl"
+          }
+        ]
+      },
+      {
+        "title": "What is your email address?",
+        "shortName": "Administrative details",
+        "includeIf": "${param.requestType != '2'}",
+        "fields": [
+          {
+            "type": "info",
+            "id": "confirmEmailHelpTextPsa",
+            "label": "",
+            "infoType": "noformat",
+            "infoText": "We will use this to send a confirmation that your request has been received.",
+            "labelSize": "s"
+          },
+          {
+            "id": "refundTypePsa",
+            "label": "Refund type",
+            "type": "text",
+            "format": "text",
+            "value": "${refundType}",
+            "submitMode": "summaryinfoonly"
+          },
+          {
+            "id": "schemeReferencePsa",
+            "label": "Pension scheme tax reference",
+            "includeIf": "${param.requestType = 1}",
+            "type": "text",
+            "format": "text",
+            "value": "${pstr}",
+            "submitMode": "summaryinfoonly"
+          },
+          {
+            "id": "userNameHiddenPsa",
+            "label": "${userNameLabel}",
+            "type": "text",
+            "format": "text",
+            "value": "${userName}",
+            "submitMode": "summaryinfoonly"
+          },
+          {
+            "id": "userIdHiddenPsa",
+            "label": "${userIdLabel}",
+            "includeIf": "${user.enrolments.HMRC-PODSPP-ORG.PSPID.count = 1 || user.enrolments.HMRC-PODS-ORG.PSAID.count = 1}",
+            "type": "text",
+            "format": "text",
+            "value": "${userId}",
+            "submitMode": "summaryinfoonly"
+          },
+          {
+            "id": "emailPsa",
+            "type": "text",
+            "errorMessage": "Enter an email address in the correct format, like name@example.com",
+            "shortName": {
+              "en": "Email address",
+              "cy": "I ble allwn ni anfon e-bost cadarnhau?"
+            },
+            "helpText": "",
+            "label": {
+              "en": "Email address",
+              "cy": "Cyfeiriad e-bost"
+            },
+            "format": "email",
+            "displayWidth": "xl"
+          }
+        ]
+      },
+      {
+        "title": "What is your pension scheme practitioner ID?",
+        "presentationHint": "invisiblePageTitle",
+        "shortName": "Pension scheme practitioner ID",
+        "includeIf": "${param.requestType = '2' && user.enrolments.HMRC-PODSPP-ORG.PSPID.count != 1}",
+        "fields": [
+          {
+            "id": "pspID",
+            "type": "text",
+            "format": "shortText",
+            "label": "What is your pension scheme practitioner ID?",
+            "helpText": "This is 8 numbers, for example '12345678'.",
+            "shortName": "Pension scheme practitioner ID",
+            "displayWidth": "m",
+            "validators": [
+              {
+                "validIf": "${pspID match '^[0-9]{8}$'}",
+                "errorMessage": "Enter a pension scheme practitioner ID in the correct format"
+              },
+              {
+                "validIf": "${pspID in user.enrolments.HMRC-PODSPP-ORG.PSPID}",
+                "errorMessage": "The pension scheme practitioner ID does not match this account"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "What is your pension scheme administrator ID?",
+        "presentationHint": "invisiblePageTitle",
+        "shortName": "Pension scheme administrator ID",
+        "includeIf": "${(param.requestType = 1 || param.requestType = 3) && user.enrolments.HMRC-PODS-ORG.PSAID.count != 1}",
+        "fields": [
+          {
+            "id": "psaID",
+            "type": "text",
+            "format": "shortText",
+            "label": "What is your pension scheme administrator ID?",
+            "shortName": "Pension scheme administrator ID",
+            "displayWidth": "m",
+            "helpText": "This is the letter 'A' followed by 7 numbers, for example 'A1234567'.",
+            "validators": [
+              {
+                "validIf": "${psaID match '^[A][0-9]{7}$'}",
+                "errorMessage": "Enter a pension scheme administrator ID in the correct format"
+              },
+              {
+                "validIf": "${psaID in user.enrolments.HMRC-PODS-ORG.PSAID}",
+                "errorMessage": "The pension scheme administrators ID does not match this account"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "How much do you want refunded?",
+        "shortName": "Refund details",
+        "includeIf": "${user.enrolments.HMRC-PODS-ORG.PSAID.count = 1 || user.enrolments.HMRC-PODSPP-ORG.PSPID.count = 1 || psaID in user.enrolments.HMRC-PODS-ORG.PSAID || pspID in user.enrolments.HMRC-PODSPP-ORG.PSPID}",
+        "fields": [
+          {
+            "type": "info",
+            "id": "amountInfo",
+            "label": "",
+            "infoType": "noformat",
+            "infoText": "There is <strong>�${param.availAmt}</strong> available."
+          },
+          {
+            "id": "availableAmount",
+            "label": "Amount",
+            "type": "text",
+            "format": "sterling",
+            "value": "${param.availAmt}",
+            "submitMode": "derived",
+            "presentationHint": "invisibleInSummary"
+          },
+          {
+            "id": "amount",
+            "type": "text",
+            "label": "Enter amount",
+            "shortName": "Refund amount",
+            "labelSize": "m",
+            "format": "positiveSterling",
+            "validators": [
+              {
+                "validIf": "${amount <= availableAmount}",
+                "errorMessage": "Enter an amount lower or equal to �${param.availAmt}"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Add bank account details",
+        "presentationHint": "invisiblePageTitle",
+        "id": "bankDetails",
+        "fields": [
+          {
+            "id": "accountName",
+            "type": "text",
+            "label": "Name on the account",
+            "labelSize": "s",
+            "format": "text"
+          },
+          {
+            "id": "sortCode",
+            "type": "text",
+            "label": "Branch sort code",
+            "labelSize": "s",
+            "helpText": "Must be 6 digits.",
+            "format": "ukSortCode",
+            "displayWidth": "l"
+          },
+          {
+            "id": "accNumber",
+            "type": "text",
+            "label": "Account number",
+            "labelSize": "s",
+            "helpText": "Must be 8 digits.",
+            "format": "ukBankAccountNumber",
+            "shortName": "Account number"
+          },
+          {
+            "id": "rollNumber",
+            "type": "text",
+            "label": "Building society roll number (optional)",
+            "labelSize": "s",
+            "mandatory": "no",
+            "format": "text",
+            "shortName": "Building society roll number"
+          },
+          {
+            "id": "bankCheckStatus",
+            "label": "Bank details",
+            "type": "text",
+            "format": "text",
+            "value": "${bankCheckMismatch orElse bankCheckVerified orElse 'Not verified'}",
+            "submitMode": "summaryinfoonly"
+          }
+        ],
+        "dataRetrieve": {
+          "type": "businessBankAccountExistence",
+          "id": "businessBankDetails",
+          "parameters": {
+            "sortCode": "${sortCode}",
+            "accountNumber": "${accNumber}",
+            "companyName": "${accountName}"
+          }
+        }
+      },
+      {
+        "title": "The bank account details you provided cannot be verified",
+        "includeIf": "${dataRetrieve.businessBankDetails.accountExists != 'yes' && dataRetrieve.businessBankDetails.sortCodeBankName = ''}",
+        "fields": [
+          {
+            "id": "noAccountInfo",
+            "label": "",
+            "type": "info",
+            "infoType": "noformat",
+            "infoText": "<dl class=\"govuk-summary-list\"><div class=\"govuk-summary-list__row\"><dt class=\"govuk-summary-list__key\">Name on the account</dt><dd class=\"govuk-summary-list__value\">${accountName}</dd></div><div class=\"govuk-summary-list__row\"><dt class=\"govuk-summary-list__key\">Sort code</dt><dd class=\"govuk-summary-list__value\">${sortCode}</dd></div><div class=\"govuk-summary-list__row\"><dt class=\"govuk-summary-list__key\">Account number</dt><dd class=\"govuk-summary-list__value\">${accNumber}</dd></div></dl>"
+          }
+        ],
+        "confirmation": {
+          "question": {
+            "id": "continueAnyway1",
+            "type": "choice",
+            "label": "Do you want to continue anyway?",
+            "labelSize": "m",
+            "choices": [
+              "Yes, use these account details",
+              "No, I want to change the account details"
+            ]
+          },
+          "pageId": "bankDetails"
+        }
+      },
+      {
+        "title": "The bank account details you provided cannot be verified",
+        "includeIf": "${dataRetrieve.businessBankDetails.accountExists != 'yes' && dataRetrieve.businessBankDetails.sortCodeBankName != ''}",
+        "fields": [
+          {
+            "id": "couldNotVerifyInfo",
+            "label": "",
+            "type": "info",
+            "infoType": "noformat",
+            "infoText": "<dl class=\"govuk-summary-list\"><div class=\"govuk-summary-list__row\"><dt class=\"govuk-summary-list__key\">Name on the account</dt><dd class=\"govuk-summary-list__value\">${accountName}</dd></div><div class=\"govuk-summary-list__row\"><dt class=\"govuk-summary-list__key\">Bank name</dt><dd class=\"govuk-summary-list__value\">${dataRetrieve.businessBankDetails.sortCodeBankName}</dd></div><div class=\"govuk-summary-list__row\"><dt class=\"govuk-summary-list__key\">Sort code</dt><dd class=\"govuk-summary-list__value\">${sortCode}</dd></div><div class=\"govuk-summary-list__row\"><dt class=\"govuk-summary-list__key\">Account number</dt><dd class=\"govuk-summary-list__value\">${accNumber}</dd></div></dl>"
+          }
+        ],
+        "confirmation": {
+          "question": {
+            "id": "continueAnyway2",
+            "type": "choice",
+            "label": "Do you want to continue anyway?",
+            "labelSize": "m",
+            "choices": [
+              "Yes, use these account details",
+              "No, I want to change the account details"
+            ]
+          },
+          "pageId": "bankDetails"
+        }
+      },
+      {
+        "title": "The name ${accountName} does not match the bank account details",
+        "includeIf": "${dataRetrieve.businessBankDetails.accountExists = 'yes' && dataRetrieve.businessBankDetails.nameMatches = 'no'}",
+        "fields": [
+          {
+            "id": "nameNotMatcvhInfo",
+            "label": "",
+            "type": "info",
+            "infoType": "noformat",
+            "infoText": "<dl class=\"govuk-summary-list\"><div class=\"govuk-summary-list__row\"><dt class=\"govuk-summary-list__key\">Name on the account</dt><dd class=\"govuk-summary-list__value\">${accountName}</dd></div><div class=\"govuk-summary-list__row\"><dt class=\"govuk-summary-list__key\">Bank name</dt><dd class=\"govuk-summary-list__value\">${dataRetrieve.businessBankDetails.sortCodeBankName}</dd></div><div class=\"govuk-summary-list__row\"><dt class=\"govuk-summary-list__key\">Sort code</dt><dd class=\"govuk-summary-list__value\">${sortCode}</dd></div><div class=\"govuk-summary-list__row\"><dt class=\"govuk-summary-list__key\">Account number</dt><dd class=\"govuk-summary-list__value\">${accNumber}</dd></div></dl>"
+          },
+          {
+            "id": "bankCheckMismatch",
+            "label": "Bank details",
+            "type": "text",
+            "format": "text",
+            "value": "${'Name on the account does not match'}",
+            "submitMode": "summaryinfoonly",
+            "presentationHint": "invisibleInSummary"
+          }
+        ],
+        "confirmation": {
+          "question": {
+            "id": "continueAnyway3",
+            "type": "choice",
+            "label": "Do you want to continue anyway?",
+            "labelSize": "m",
+            "choices": [
+              "Yes, use ${accountName} as the name on the account",
+              "No, I want to change the account details"
+            ]
+          },
+          "pageId": "bankDetails"
+        }
+      },
+      {
+        "title": "Bank details",
+        "includeIf": "${dataRetrieve.businessBankDetails.accountExists = 'yes' && dataRetrieve.businessBankDetails.nameMatches = 'yes'}",
+        "fields": [
+          {
+            "id": "bankDetailsConfirmedInfo",
+            "label": "",
+            "type": "info",
+            "infoType": "noformat",
+            "infoText": "<dl class=\"govuk-summary-list\"><div class=\"govuk-summary-list__row\"><dt class=\"govuk-summary-list__key\">Name on the account</dt><dd class=\"govuk-summary-list__value\">${accountName}</dd></div><div class=\"govuk-summary-list__row\"><dt class=\"govuk-summary-list__key\">Bank name</dt><dd class=\"govuk-summary-list__value\">${dataRetrieve.businessBankDetails.sortCodeBankName}</dd></div><div class=\"govuk-summary-list__row\"><dt class=\"govuk-summary-list__key\">Sort code</dt><dd class=\"govuk-summary-list__value\">${sortCode}</dd></div><div class=\"govuk-summary-list__row\"><dt class=\"govuk-summary-list__key\">Account number    </dt>    <dd class=\"govuk-summary-list__value\">${accNumber}</dd></div></dl>"
+          },
+          {
+            "id": "bankCheckVerified",
+            "label": "Bank details",
+            "type": "text",
+            "format": "text",
+            "value": "${'Verified'}",
+            "submitMode": "summaryinfoonly",
+            "presentationHint": "invisibleInSummary"
+          }
+        ],
+        "confirmation": {
+          "question": {
+            "id": "continueAnyway4",
+            "type": "choice",
+            "label": "Are the account details correct?",
+            "labelSize": "m",
+            "format": "yesno"
+          },
+          "pageId": "bankDetails"
+        }
+      }
+    ],
+    "summarySection": {
+      "title": "Check your answers",
+      "header": "",
+      "footer": "<p class='govuk-body'>I confirm that the information I have provided is true and complete.</p>",
+      "continueLabel": "Agree and submit"
+    },
+    "acknowledgementSection": {
+      "title": "Acknowledgement Page",
+      "fields": [
+        {
+          "id": "nextSteps",
+          "type": "info",
+          "label": "",
+          "infoText": "We have sent a copy of your submission reference to ${email}\n\n[Print or save a copy of your form (opens in new tab)](/submissions/acknowledgement/pdf/${form.id})\n\n## What happens next\n\nYour refund request has been submitted. You should receive your refund within 15 working days subject to approval.\n\nInterest may be added to your refund.\n\n\nReturn to your <a href='${podsReturnUrl}'>managing pension schemes service account (opens in new tab)</a>.",
+          "infoType": "noformat"
+        }
+      ]
+    },
+    "destinations": [
+      {
+        "id": "dmsQueue",
+        "type": "hmrcDms",
+        "failOnError": true,
+        "convertSingleQuotes": true,
+        "dmsFormId": "REFUND",
+        "customerId": "${psaID orElse pspID orElse userId}",
+        "classificationType": "SPT-ITTP-Queue 40",
+        "businessArea": "SPT"
+      }
+    ]
+  }
+
+#+end_src
+
+#+RESULTS:
+#+begin_src ob-verb-response
+HTTP/1.1 204 No Content
+Cache-Control: no-cache,no-store,max-age=0
+Date: Mon, 25 Apr 2022 08:58:13 GMT
+#+end_src
+
